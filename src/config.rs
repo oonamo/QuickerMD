@@ -10,6 +10,7 @@ pub struct Config {
 #[derive(Deserialize, Debug)]
 pub struct LanguageConfig {
     template: Option<String>,
+    #[serde(rename = "command")]
     compile_command: Vec<String>,
 
     prefix: Option<String>,

@@ -27,7 +27,7 @@ quicker_md --lang <LANG> [INPUT]
 Config file
 ```toml
 [langs.c]
-compile_command = ["gcc", "{{IN}}", "-o", "{{OUT}}"]
+command = ["gcc", "{{IN}}", "-o", "{{OUT}}"]
 template = """
 #include <stdbool.h>
 #include <stdio.h>
