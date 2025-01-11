@@ -7,7 +7,7 @@ use std::process::{Command, Stdio};
 use tempfile::tempdir;
 
 #[derive(Debug)]
-pub struct QuickCOutput {
+pub struct QuickMDOutput {
     pub output_file: PathBuf,
     pub stdout: Vec<String>,
     pub stderr: Vec<String>,
@@ -22,11 +22,10 @@ pub fn show_output(str: &Vec<String>, prefix: &str) {
     println!("");
 }
 
-impl<'lang> QuickCOutput {
-    pub fn controller(template: &'lang Template) -> std::io::Result<Self> {
+impl<'lang> QuickMDOutput {
         let conf = template.get_conf();
         if conf.should_redir() {
-            return QuickCOutput::redir_input(template, conf);
+            return QuickMDOutput::redir_input(template, conf);
         }
 
         let tmp_dir = tempdir()?;
@@ -65,14 +64,14 @@ impl<'lang> QuickCOutput {
         let stderr = u8_to_str_vec(output.stderr);
 
         if !output.status.success() || consumed_input {
-            return Ok(QuickCOutput {
+            return Ok(QuickMDOutput {
                 output_file: PathBuf::from(out_file),
                 stdout,
                 stderr
             });
         }
 
-        let ret = QuickCOutput::run(PathBuf::from(out_file.clone()));
+        let ret = QuickMDOutput::run(PathBuf::from(out_file.clone()));
 
         drop(out_file);
         _ = tmp_dir.close(); // Supress error
@@ -107,7 +106,7 @@ impl<'lang> QuickCOutput {
         let stdout = u8_to_str_vec(output.stdout);
         let stderr = u8_to_str_vec(output.stderr);
 
-        Ok(QuickCOutput {
+        Ok(QuickMDOutput {
             output_file: PathBuf::from("stdin"),
             stdout,
             stderr,
@@ -121,7 +120,7 @@ impl<'lang> QuickCOutput {
         let stdout = u8_to_str_vec(output.stdout);
         let stderr = u8_to_str_vec(output.stderr);
 
-        Ok(QuickCOutput {
+        Ok(QuickMDOutput {
             output_file: file,
             stdout,
             stderr,

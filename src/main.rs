@@ -7,7 +7,7 @@ mod config;
 mod templates;
 mod utils;
 
-use crate::collect::QuickCOutput;
+use crate::collect::QuickMDOutput;
 use crate::templates::Template;
 
 #[derive(Parser)]
@@ -74,7 +74,7 @@ fn main() {
 
     if let Some(lang_conf) = config.get_lang_conf(&lang) {
         let template = Template::new(&lang, lang_conf, input_vec.clone());
-        let result = QuickCOutput::controller(&template);
+        let result = QuickMDOutput::start(&template);
         if let Ok(output) = result {
             let prefix_opt: Option<String>;
 
