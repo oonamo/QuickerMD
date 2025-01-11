@@ -39,16 +39,13 @@ pub fn is_interactive() -> bool {
 }
 
 pub fn collect_stdin() -> Vec<String> {
-    let mut buf = Vec::new();
-
     let stdin = io::stdin();
     let reader = stdin.lock();
 
-    for line in reader.lines() {
-        buf.push(line.expect("Could not convert to line"));
-    }
-
-    buf
+    reader
+        .lines()
+        .map(|s| s.expect("Could not convert line to string"))
+        .collect()
 }
 
 fn main() {
