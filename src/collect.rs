@@ -23,6 +23,7 @@ pub fn show_output(str: &Vec<String>, prefix: &str) {
 }
 
 impl<'lang> QuickMDOutput {
+    pub fn start(template: &'lang Template) -> std::io::Result<Self> {
         let conf = template.get_conf();
         if conf.should_redir() {
             return QuickMDOutput::redir_input(template, conf);
