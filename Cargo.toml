@@ -1,0 +1,11 @@
+[package]
+name = "quicker_md"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+clap = { version = "4.5.24", features = ["derive"] }
+directories = "5.0.1"
+serde = { version = "1.0.217", features = ["derive"] }
+tempfile = "3.15.0"
+toml = "0.8.19"
