@@ -1,0 +1,52 @@
+site_name: QuickerMD
+theme:
+  name: material
+  features:
+    - content.code.copy
+    - content.code.select
+    - content.footnote.tooltips
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: deep purple
+      accent: deep purple
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to dark mode
+
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: deep purple
+      accent: purple
+      toggle:
+        icon: material/weather-night
+        name: Switch to light mode
+
+nav:
+  - Home: index.md
+  - Configuration:
+    - Getting Started: config/getting-started.md
+    - Example Config: config/example-config.md
+    - Compiled Vs Interpreted: config/compiled-vs-interpreted.md
+    - Adding Languages: config/adding-languages.md
+    - Command: config/command.md
+    - Redirecting Input: config/redirecting-input.md
+    - File Extensions: config/file-extensions.md
+    - Prefixing Output: config/prefix.md
+    - Templating: config/templating.md
+  - CLI:
+    - Usage: cli/usage.md
+
+markdown_extensions:
+  - admonition
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+  - pymdownx.details
+  - pymdownx.superfences
+  - tables
+  - footnotes
