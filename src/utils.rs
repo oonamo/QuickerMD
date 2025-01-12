@@ -1,3 +1,7 @@
+// TODO: Should this affect whitespace characters?
+//  ```rs
+//  str_vec_non_empty(&vec!["\n", "\t", " "]) == false
+//  ```
 pub fn str_vec_non_empty(vec: &Vec<String>) -> bool {
     vec.iter().any(|s| !s.is_empty())
 }
