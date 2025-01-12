@@ -11,6 +11,12 @@ Quicker MD
 
 - [Features](#features)
 - [Installation](#installation)
+- [Usage](#usage)
+    - [Overview](#overview)
+        - [Variables](#variables)
+        - [Compiled vs Interpreted](#compiled-vs-interpreted)
+    - [Examples](#examples)
+        - [Example Config](#example-config)
 
 ## Features
 - [x] Create a template for any compiled language
@@ -22,6 +28,12 @@ Quicker MD
 TODO
 ```
 
+Config Locations:
+| **Platform** | **Config Location** |
+|---|---|
+| Windows | `%LOCALAPPDATA%\QuickMD\config\config.toml` |
+| MacOS | `$HOME/Library/Application Support/QuickMD/config.toml` |
+| Linux | `$XDG_CONFIG_HOME/QuickMD/config.toml or $HOME/.config/QuickMD/config.toml` |
 ## Usage
 
 ### Overview
@@ -60,6 +72,7 @@ To decide whether to compile or run the command, Quicker MD follows a principle 
 > The **OUT** variable is **required** for executing the file
 
 ### Examples
+#### Example config
 ```toml
 [langs.c]
 command = ["gcc", "{{IN}}", "-o", "{{OUT}}"]
