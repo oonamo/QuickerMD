@@ -6,7 +6,7 @@ Quicker MD
     <b>Quickly run any compiled/interpreted language</b>
 </p>
 
-> [!WARNING] UNSTABLE
+> [!CAUTION]
 > Expect breaking changes until this goes away!!
 
 - [Features](#features)
@@ -55,7 +55,7 @@ To decide whether to compile or run the command, Quicker MD follows a principle 
             1. Write the input between the `<<< TEMPLATE` blocks to a file
             2. Run the provided command with variables
 
-> [!INFO] Compiling
+> [!INFO]
 > Currently, their is **no** fallback for executing a command that has no **OUT** variable
 > The **OUT** variable is **required** for executing the file
 
