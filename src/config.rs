@@ -34,11 +34,12 @@ pub struct LanguageConfig {
 
 impl Config {
     pub fn from_config() -> Self {
-        let path = ProjectDirs::from("", "", "QuickC")
+        let path = ProjectDirs::from("", "", "QuickMD")
             .expect("Could not resolve project directory. OS may be unsupported")
             .config_local_dir()
             .join("config.toml");
 
+        // TODO: Gracefully handle non existing config
         let config_contents = std::fs::read_to_string(path).expect("Config does not exist!");
         let mut config: Config = toml::from_str(&config_contents).expect("Could not parse to toml");
 
