@@ -30,9 +30,6 @@ pub struct LanguageConfig {
 
     #[serde(skip)]
     template_end: usize,
-
-    #[serde(skip)]
-    keys: Vec<(String, String)>,
 }
 
 #[derive(Deserialize, Debug, Clone)]
