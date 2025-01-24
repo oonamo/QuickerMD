@@ -10,8 +10,8 @@ The format is `[langs.{name}]`. The `{name}` part will be the part that will be 
 
 ## Examples
 
-| Language | Config | CLI |
-|:--:|:--:|---|
-| C | `[langs.c]` | `--lang c` |
-| Rust | `[langs.rust]` | `--lang rust` |
-| Python | `[langs.py]` | `--lang py` |
+| Language | Config         | CLI           |
+| :--:     | :--:           | ---           |
+| C        | `[langs.c]`    | `--lang c`    |
+| Rust     | `[langs.rust]` | `--lang rust` |
+| Python   | `[langs.py]`   | `--lang py`   |

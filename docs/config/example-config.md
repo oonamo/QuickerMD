@@ -65,3 +65,4 @@ Each individual entry is composed of the following:
 | `prefix` | **False** | "" |Prefix to use on *non-code* output | `prefix = "# "` | [Prefixing Output](prefix.md) |
 | `template` | **False** | None | Template string for compiled languages | See [Example Config](example-config.md#configtoml) | [Templating](templating.md) |
 | `extension` | **False** | {name} | File extension to use if file on compiled language  | `extension = "rs"` | [File Extensions](file-extensions.md) |
+| `run` | False | True/{{OUT}} | Whether to run a 'run' command after `command`, and optionally a command | run = ["my_compiled_program", "Hello!" | [Running your Program](running.md) |

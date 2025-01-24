@@ -34,6 +34,7 @@ nav:
     - File Extensions: config/file-extensions.md
     - Prefixing Output: config/prefix.md
     - Templating: config/templating.md
+    - Running Your Config: config/running.md
   - CLI:
     - Usage: cli/usage.md
 
@@ -47,6 +48,10 @@ markdown_extensions:
   - pymdownx.snippets
   - pymdownx.superfences
   - pymdownx.details
-  - pymdownx.superfences
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
   - tables
   - footnotes
