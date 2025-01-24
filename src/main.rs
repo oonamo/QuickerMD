@@ -6,6 +6,7 @@ mod collect;
 mod config;
 mod templates;
 mod utils;
+mod variables;
 
 use crate::collect::QuickMDOutput;
 use crate::templates::Template;
@@ -91,7 +92,10 @@ fn main() {
 
             output.output(input_opt, raw, prefix_opt);
         } else {
-            exit("Could not write tmp file!", 1);
+            exit(
+                &format!("An error occured while running!: \n{}", result.unwrap_err()),
+                1,
+            );
         }
     } else {
         exit(

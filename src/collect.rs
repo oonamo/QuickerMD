@@ -1,5 +1,6 @@
 use crate::config::LanguageConfig;
 use crate::utils::*;
+use crate::variables::VariableParser;
 use crate::Template;
 use std::io::Write;
 use std::path::PathBuf;
@@ -33,52 +34,48 @@ impl<'lang> QuickMDOutput {
         let tmp_path = tmp_dir
             .path()
             .join(format!("tmp.{}", template.get_file_ext()));
+
         let out_file = tmp_dir.path().join("out");
         template.to_file_path(tmp_path.clone())?;
 
-        let mut keys = vec![
+        let input_str = template.input_to_str();
+
+        let variables = vec![
             ("{{IN}}", tmp_path.to_str().unwrap()),
             ("{{OUT}}", out_file.to_str().unwrap()),
+            ("{{INPUT}}", &input_str),
         ];
 
-        let binding = template.input_to_str();
-        keys.push(("{{INPUT}}", binding.as_str()));
+        let mut parser = VariableParser::new(variables);
 
         let cmd_name = conf.get_command_name();
-        let mut args = conf.get_command_args();
-        let mut consumed_input = false;
+        let mut args: Vec<String> = conf.get_command_args();
 
-        for arg in args.iter_mut() {
-            for (key, value) in keys.iter() {
-                if arg.contains(key) {
-                    if key.eq_ignore_ascii_case("{{INPUT}}") {
-                        consumed_input = true;
-                    }
-                    *arg = arg.replace(key, value);
-                }
-            }
-        }
+        parser.parse_with_tracker(&mut args);
+
+        let consumed_input = parser.had_used_var("{{INPUT}}");
+
 
         let output = Command::new(cmd_name).args(args).output()?;
 
         let stdout = u8_to_str_vec(output.stdout);
         let stderr = u8_to_str_vec(output.stderr);
 
-        if !output.status.success() || consumed_input {
+        if !output.status.success() || consumed_input || template.get_conf().explicit_no_run() {
             return Ok(QuickMDOutput {
                 output_file: PathBuf::from(out_file),
                 stdout,
-                stderr
+                stderr,
             });
         }
-
-        let ret = QuickMDOutput::run(PathBuf::from(out_file.clone()));
+        let ret = QuickMDOutput::run(PathBuf::from(out_file.clone()), template, &parser);
 
         drop(out_file);
         _ = tmp_dir.close(); // Supress error
 
         ret
     }
+
     pub fn redir_input(
         template: &'lang Template,
         conf: &'lang LanguageConfig,
@@ -114,9 +111,20 @@ impl<'lang> QuickMDOutput {
         })
     }
 
-    pub fn run(file: PathBuf) -> std::io::Result<Self> {
+    pub fn run(
+        file: PathBuf,
+        template: &'lang Template,
+        variables: &'lang VariableParser<&str, &str>,
+    ) -> std::io::Result<Self> {
         let output_file = format!("{}", file.to_str().unwrap());
-        let output = Command::new(output_file).output()?;
+        let output;
+
+        if let Some((exe_command, mut args)) = template.get_run_command(output_file.clone()) {
+            variables.parse_string_vec(&mut args);
+            output = Command::new(exe_command).args(args).output()?;
+        } else {
+            output = Command::new(output_file).output()?;
+        }
 
         let stdout = u8_to_str_vec(output.stdout);
         let stderr = u8_to_str_vec(output.stderr);

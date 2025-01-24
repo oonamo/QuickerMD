@@ -12,7 +12,11 @@ pub struct Template<'lang> {
 
 impl<'lang> Template<'lang> {
     pub fn new(lang: &'lang str, conf: &'lang LanguageConfig, input: Vec<String>) -> Self {
-        Template { conf, input, file_ext: lang.to_string() }
+        Template {
+            conf,
+            input,
+            file_ext: lang.to_string(),
+        }
     }
 
     pub fn to_file_path(&self, path: PathBuf) -> std::io::Result<()> {
@@ -45,5 +49,9 @@ impl<'lang> Template<'lang> {
             str.push('\n');
         }
         str
+    }
+
+    pub fn get_run_command(&self, file: String) -> Option<(String, Vec<String>)> {
+        self.conf.get_run_command(file)
     }
 }
