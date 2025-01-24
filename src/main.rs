@@ -1,56 +1,18 @@
 use clap::Parser;
 use config::Config;
-use std::io::{self, BufRead, IsTerminal};
 
 mod collect;
 mod config;
 mod templates;
 mod utils;
 mod variables;
+mod cli;
 
 use crate::collect::QuickMDOutput;
 use crate::templates::Template;
 
-#[derive(Parser)]
-#[command(version, about, long_about = None)]
-pub struct Cli {
-    /// Language to use config from
-    #[arg(short, long)]
-    lang: String,
-
-    /// Input to be passed in to the command
-    #[arg(value_name = "INPUT")]
-    input: Option<String>,
-
-    /// Show the input that was used to run
-    #[arg(short, long, default_value_t = false)]
-    show_input: bool,
-
-    /// Only show the raw input and output
-    #[arg(short, long, default_value_t = false)]
-    raw: bool,
-
-    /// Don't show the prefix
-    #[arg(short, long, default_value_t = false)]
-    no_prefix: bool,
-}
-
-pub fn is_interactive() -> bool {
-    io::stdin().is_terminal()
-}
-
-pub fn collect_stdin() -> Vec<String> {
-    let stdin = io::stdin();
-    let reader = stdin.lock();
-
-    reader
-        .lines()
-        .map(|s| s.expect("Could not convert line to string"))
-        .collect()
-}
-
 fn main() {
-    let cli = Cli::parse();
+    let cli = cli::Cli::parse();
 
     let lang = cli.lang;
     let raw = cli.raw;
@@ -58,14 +20,14 @@ fn main() {
 
     let input_vec: Vec<String>;
 
-    if is_interactive() {
+    if cli::is_interactive() {
         if let Some(input) = cli.input {
             input_vec = input.lines().map(|s| s.to_string()).collect();
         } else {
             exit("No input found. Please provide an input!", 1);
         }
     } else {
-        input_vec = collect_stdin();
+        input_vec = cli::collect_stdin();
     }
 
     let config = Config::from_config();
