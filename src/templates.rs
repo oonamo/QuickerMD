@@ -51,7 +51,7 @@ impl<'lang> Template<'lang> {
         str
     }
 
-    pub fn get_run_command(&self) -> Option<String> {
-        self.conf.get_run_command()
+    pub fn get_run_command(&self, file: String) -> Option<(String, Vec<String>)> {
+        self.conf.get_run_command(file)
     }
 }

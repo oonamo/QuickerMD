@@ -55,21 +55,20 @@ impl<'lang> QuickMDOutput {
 
         let consumed_input = parser.had_used_var("{{INPUT}}");
 
+
         let output = Command::new(cmd_name).args(args).output()?;
 
         let stdout = u8_to_str_vec(output.stdout);
         let stderr = u8_to_str_vec(output.stderr);
 
-        // TODO: There are some conditions `consumed_input` != Command done
-        if !output.status.success() || consumed_input {
+        if !output.status.success() || consumed_input || template.get_conf().explicit_no_run() {
             return Ok(QuickMDOutput {
                 output_file: PathBuf::from(out_file),
                 stdout,
                 stderr,
             });
         }
-
-        let ret = QuickMDOutput::run(PathBuf::from(out_file.clone()), template);
+        let ret = QuickMDOutput::run(PathBuf::from(out_file.clone()), template, &parser);
 
         drop(out_file);
         _ = tmp_dir.close(); // Supress error
@@ -112,13 +111,17 @@ impl<'lang> QuickMDOutput {
         })
     }
 
-    pub fn run(file: PathBuf, template: &'lang Template) -> std::io::Result<Self> {
+    pub fn run(
+        file: PathBuf,
+        template: &'lang Template,
+        variables: &'lang VariableParser<&str, &str>,
+    ) -> std::io::Result<Self> {
         let output_file = format!("{}", file.to_str().unwrap());
         let output;
 
-        // TODO: Allow for variables
-        if let Some(exe_command) = template.get_run_command() {
-            output = Command::new(exe_command).output()?;
+        if let Some((exe_command, mut args)) = template.get_run_command(output_file.clone()) {
+            variables.parse_string_vec(&mut args);
+            output = Command::new(exe_command).args(args).output()?;
         } else {
             output = Command::new(output_file).output()?;
         }

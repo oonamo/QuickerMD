@@ -16,7 +16,7 @@ pub struct LanguageConfig {
     prefix: Option<String>,
     extension: Option<String>,
 
-    run_command: Option<String>,
+    run_command: Option<RunCommandType>,
 
     #[serde(default)]
     redir_input: bool,
@@ -32,6 +32,13 @@ pub struct LanguageConfig {
 
     #[serde(skip)]
     keys: Vec<(String, String)>,
+}
+
+#[derive(Deserialize, Debug, Clone)]
+#[serde(untagged)]
+pub enum RunCommandType {
+    Bool(bool),
+    StringVec(Vec<String>),
 }
 
 impl Config {
@@ -73,8 +80,32 @@ impl LanguageConfig {
     pub fn get_command_args(&self) -> Vec<String> {
         self.compile_command.iter().skip(1).cloned().collect()
     }
-    pub fn get_run_command(&self) -> Option<String> {
-        self.run_command.clone()
+    pub fn explicit_no_run(&self) -> bool {
+        match self.run_command.clone() {
+            Some(command_type) => match command_type {
+                RunCommandType::Bool(val) => !val,
+                _ => false,
+            }
+            _ => false,
+        }
+    }
+    pub fn get_run_command(&self, file: String) -> Option<(String, Vec<String>)> {
+        if let Some(command_type) = self.run_command.clone() {
+            return match command_type {
+                RunCommandType::Bool(b) => {
+                    if b {
+                        Some((file, Vec::with_capacity(0)))
+                    } else {
+                        None
+                    }
+                }
+                RunCommandType::StringVec(command) => Some((
+                    command[0].clone(),
+                    command.iter().take(1).cloned().collect(),
+                )),
+            };
+        }
+        None
     }
     pub fn get_prefix(&self) -> Option<String> {
         self.prefix.clone()
@@ -84,22 +115,6 @@ impl LanguageConfig {
     }
     pub fn get_extension(&self) -> Option<String> {
         self.extension.clone()
-    }
-    pub fn add_keys(&mut self, keys: Vec<(String, String)>) {
-        for key in keys.iter() {
-            self.keys.push(key.clone());
-        }
-
-        self.resolve_command();
-    }
-    fn resolve_command(&mut self) {
-        for command in self.compile_command.iter_mut() {
-            for (key, value) in self.keys.iter() {
-                if command.contains(key) {
-                    *command = command.replace(key, value);
-                }
-            }
-        }
     }
     pub fn to_string_from_input(&self, input: Vec<String>) -> String {
         let mut str = String::new();
