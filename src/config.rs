@@ -16,6 +16,7 @@ pub struct LanguageConfig {
     prefix: Option<String>,
     extension: Option<String>,
 
+    #[serde(rename = "run")]
     run_command: Option<RunCommandType>,
 
     #[serde(default)]
