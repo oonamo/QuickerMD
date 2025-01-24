@@ -1,5 +1,6 @@
 use crate::config::LanguageConfig;
 use crate::utils::*;
+use crate::variables::VariableParser;
 use crate::Template;
 use std::io::Write;
 use std::path::PathBuf;
@@ -33,37 +34,33 @@ impl<'lang> QuickMDOutput {
         let tmp_path = tmp_dir
             .path()
             .join(format!("tmp.{}", template.get_file_ext()));
+
         let out_file = tmp_dir.path().join("out");
         template.to_file_path(tmp_path.clone())?;
 
-        let mut keys = vec![
+        let input_str = template.input_to_str();
+
+        let variables = vec![
             ("{{IN}}", tmp_path.to_str().unwrap()),
             ("{{OUT}}", out_file.to_str().unwrap()),
+            ("{{INPUT}}", &input_str),
         ];
 
-        let binding = template.input_to_str();
-        keys.push(("{{INPUT}}", binding.as_str()));
+        let mut parser = VariableParser::new(variables);
 
         let cmd_name = conf.get_command_name();
-        let mut args = conf.get_command_args();
-        let mut consumed_input = false;
+        let mut args: Vec<String> = conf.get_command_args();
 
-        for arg in args.iter_mut() {
-            for (key, value) in keys.iter() {
-                if arg.contains(key) {
-                    if key.eq_ignore_ascii_case("{{INPUT}}") {
-                        consumed_input = true;
-                    }
-                    *arg = arg.replace(key, value);
-                }
-            }
-        }
+        parser.parse_with_tracker(&mut args);
+
+        let consumed_input = parser.had_used_var("{{INPUT}}");
 
         let output = Command::new(cmd_name).args(args).output()?;
 
         let stdout = u8_to_str_vec(output.stdout);
         let stderr = u8_to_str_vec(output.stderr);
 
+        // TODO: There are some conditions `consumed_input` != Command done
         if !output.status.success() || consumed_input {
             return Ok(QuickMDOutput {
                 output_file: PathBuf::from(out_file),
@@ -79,6 +76,7 @@ impl<'lang> QuickMDOutput {
 
         ret
     }
+
     pub fn redir_input(
         template: &'lang Template,
         conf: &'lang LanguageConfig,
