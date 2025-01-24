@@ -16,6 +16,8 @@ pub struct LanguageConfig {
     prefix: Option<String>,
     extension: Option<String>,
 
+    run_command: Option<String>,
+
     #[serde(default)]
     redir_input: bool,
 
@@ -70,6 +72,9 @@ impl LanguageConfig {
     }
     pub fn get_command_args(&self) -> Vec<String> {
         self.compile_command.iter().skip(1).cloned().collect()
+    }
+    pub fn get_run_command(&self) -> Option<String> {
+        self.run_command.clone()
     }
     pub fn get_prefix(&self) -> Option<String> {
         self.prefix.clone()

@@ -68,11 +68,11 @@ impl<'lang> QuickMDOutput {
             return Ok(QuickMDOutput {
                 output_file: PathBuf::from(out_file),
                 stdout,
-                stderr
+                stderr,
             });
         }
 
-        let ret = QuickMDOutput::run(PathBuf::from(out_file.clone()));
+        let ret = QuickMDOutput::run(PathBuf::from(out_file.clone()), template);
 
         drop(out_file);
         _ = tmp_dir.close(); // Supress error
@@ -114,9 +114,16 @@ impl<'lang> QuickMDOutput {
         })
     }
 
-    pub fn run(file: PathBuf) -> std::io::Result<Self> {
+    pub fn run(file: PathBuf, template: &'lang Template) -> std::io::Result<Self> {
         let output_file = format!("{}", file.to_str().unwrap());
-        let output = Command::new(output_file).output()?;
+        let output;
+
+        // TODO: Allow for variables
+        if let Some(exe_command) = template.get_run_command() {
+            output = Command::new(exe_command).output()?;
+        } else {
+            output = Command::new(output_file).output()?;
+        }
 
         let stdout = u8_to_str_vec(output.stdout);
         let stderr = u8_to_str_vec(output.stderr);
