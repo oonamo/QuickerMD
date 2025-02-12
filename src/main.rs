@@ -16,27 +16,30 @@ fn exit(message: &str, code: i32) -> ! {
     std::process::exit(code);
 }
 
-fn dump_template(config: &Config, args: &cli::DumpArgs) {
-    if let Some(lang_conf) = config.get_lang_conf(&args.lang) {
-        let template = if let Some(temp) = lang_conf.get_template() {
-            temp
-        } else {
-            exit(&format!("Template does not exist for '{}'", args.lang), 1)
-        };
-
-        println!("{}", template);
+fn get_lang_conf_or_exit<'lang>(
+    config: &'lang Config,
+    lang: &str,
+) -> &'lang config::LanguageConfig {
+    if let Some(lang_conf) = config.get_lang_conf(lang) {
+        lang_conf
     } else {
-        exit(&format!("No Language Config for '{}'", args.lang), 1)
+        exit(&format!("Template does not exist for '{}'", lang), 1);
     }
 }
 
-fn run_input(config: &Config, args: &cli::RunArgs) {
-    let lang_conf = if let Some(conf) = config.get_lang_conf(&args.lang) {
-        conf
+fn dump_template(config: &Config, args: &cli::DumpArgs) {
+    let lang_conf = get_lang_conf_or_exit(config, &args.lang);
+    let template = if let Some(temp) = lang_conf.get_template() {
+        temp
     } else {
-        exit(&format!("No Language Config for '{}'", args.lang), 1)
+        exit(&format!("Template does not exist for '{}'", args.lang), 1)
     };
 
+    println!("{}", template);
+}
+
+fn run_input(config: &Config, args: &cli::RunArgs) {
+    let lang_conf = get_lang_conf_or_exit(config, &args.lang);
     let input_vec: Vec<String>;
 
     if cli::is_interactive() {
@@ -50,9 +53,14 @@ fn run_input(config: &Config, args: &cli::RunArgs) {
     }
 
     let template = Template::new(&args.lang, lang_conf, input_vec.clone());
-    let output = QuickMDOutput::start(&template).map_err(|e| {
-        exit(&format!("There was an error running the program\n{}", e.to_string()), 1);
-    }).unwrap();
+    let output = QuickMDOutput::start(&template)
+        .map_err(|e| {
+            exit(
+                &format!("There was an error running the program\n{}", e.to_string()),
+                1,
+            );
+        })
+        .unwrap();
 
     let prefix_opt = if args.no_prefix {
         None
