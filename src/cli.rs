@@ -1,15 +1,36 @@
-use clap::Parser;
+use clap::{Args, Parser, Subcommand};
 use std::io::{self, BufRead, IsTerminal};
 
 #[derive(Parser)]
 #[command(version, about, long_about = None)]
 pub struct Cli {
-    /// Language to use config from
-    #[arg(short, long)]
+    #[command(subcommand)]
+    pub actions: QuickerActions,
+}
+
+#[derive(Subcommand)]
+pub enum QuickerActions {
+    /// Dumps the template
+    DumpTemplate(DumpArgs),
+
+    /// Runs the template + input
+    Run(RunArgs),
+}
+
+#[derive(Args)]
+pub struct DumpArgs {
+    /// The language to dump its template
     pub lang: String,
 
-    /// Input to be passed in to the command
-    #[arg(value_name = "INPUT")]
+    /// Whether to remove the template lines
+    // TODO: Refactor template to add the ability to trim those lines
+    #[arg(short, long, default_value_t = false)]
+    pub remove_template_lines: bool,
+}
+
+#[derive(Args)]
+pub struct RunArgs {
+    pub lang: String,
     pub input: Option<String>,
 
     /// Show the input that was used to run
@@ -23,6 +44,7 @@ pub struct Cli {
     /// Don't show the prefix
     #[arg(short, long, default_value_t = false)]
     pub no_prefix: bool,
+
 }
 
 pub fn is_interactive() -> bool {
