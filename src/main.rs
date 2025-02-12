@@ -7,55 +7,42 @@ mod config;
 mod templates;
 mod utils;
 mod variables;
+mod resolver;
 
 use crate::collect::QuickMDOutput;
 use crate::templates::Template;
 
-fn exit(message: &str, code: i32) -> ! {
-    eprintln!("{}", message);
-    std::process::exit(code);
-}
-
-fn get_lang_conf_or_exit<'lang>(
-    config: &'lang Config,
-    lang: &str,
-) -> &'lang config::LanguageConfig {
-    if let Some(lang_conf) = config.get_lang_conf(lang) {
-        lang_conf
-    } else {
-        exit(&format!("Language Config does not exist for '{}'", lang), 1);
-    }
-}
-
 fn dump_template(config: &Config, args: &cli::DumpArgs) {
-    let lang_conf = get_lang_conf_or_exit(config, &args.lang);
-    let template = if let Some(temp) = lang_conf.get_template() {
+    let lang_conf = resolver::lang_conf(config, &args.lang);
+    let template_string = if let Some(temp) = lang_conf.get_template() {
         temp
     } else {
-        exit(&format!("Template does not exist for '{}'", args.lang), 1)
+        utils::exit(&format!("Template does not exist for '{}'", args.lang), 1)
     };
 
-    println!("{}", template);
+    let input_vec = resolver::input(&args.input);
+
+    if let Some(input) = input_vec {
+        let template = Template::new(&args.lang, lang_conf, input.clone());
+        println!("{}", template.get_conf().to_string_from_input(input));
+        return;
+    } else if args.remove_template_lines {
+        let template = Template::new(&args.lang, lang_conf, Vec::with_capacity(0));
+        println!("{}", template.get_conf().to_string_from_input(Vec::with_capacity(0)));
+        return;
+    }
+
+    println!("{}", template_string);
 }
 
 fn run_input(config: &Config, args: &cli::RunArgs) {
-    let lang_conf = get_lang_conf_or_exit(config, &args.lang);
-    let input_vec: Vec<String>;
-
-    if cli::is_interactive() {
-        if let Some(input) = args.input.clone() {
-            input_vec = input.lines().map(|s| s.to_string()).collect();
-        } else {
-            exit(&format!("No Input detected'{}'", args.lang), 1)
-        }
-    } else {
-        input_vec = cli::collect_stdin();
-    }
+    let lang_conf = resolver::lang_conf(config, &args.lang);
+    let Some(input_vec) = resolver::input(&args.input) else { utils::exit("No Input Found", 1); };
 
     let template = Template::new(&args.lang, lang_conf, input_vec.clone());
     let output = QuickMDOutput::start(&template)
         .map_err(|e| {
-            exit(
+            utils::exit(
                 &format!("There was an error running the program\n{}", e.to_string()),
                 1,
             );
