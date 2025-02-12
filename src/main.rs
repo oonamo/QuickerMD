@@ -23,7 +23,7 @@ fn get_lang_conf_or_exit<'lang>(
     if let Some(lang_conf) = config.get_lang_conf(lang) {
         lang_conf
     } else {
-        exit(&format!("Template does not exist for '{}'", lang), 1);
+        exit(&format!("Language Config does not exist for '{}'", lang), 1);
     }
 }
 
