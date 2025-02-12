@@ -14,7 +14,7 @@ prefix = "// "
 ```
 
 ```sh
-echo 'console.log("What will this output")' | quicker_md --lang js --show-input
+echo 'console.log("What will this output")' | quicker_md run js --show-input
 ```
 
 Will output:

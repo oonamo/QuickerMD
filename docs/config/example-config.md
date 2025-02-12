@@ -49,7 +49,7 @@ pub fn main() {
 
 Try it with the following commands!
 ```sh
-quicker_md --show-input --lang js "console.log('Hello, from QuickerMD!')"
+quicker_md run js "console.log('Hello, from QuickerMD!')" --show-input
 ```
 
 ## Understanding Configuration

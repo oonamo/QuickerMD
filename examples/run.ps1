@@ -9,4 +9,4 @@ if ($extension -like "py") {
     $extension = "python"
 }
 
-cat $path | quicker_md --lang $extension --show-input
+cat $path | quicker_md run $extension --show-input
