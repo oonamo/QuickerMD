@@ -39,6 +39,12 @@ pub enum RunCommandType {
     StringVec(Vec<String>),
 }
 
+pub enum OutputFormatType {
+    /// The Output is formatted by sorting
+    Sorted,
+    Grouped,
+}
+
 impl Config {
     pub fn from_config() -> Self {
         let path = ProjectDirs::from("", "", "QuickMD")
@@ -83,7 +89,7 @@ impl LanguageConfig {
             Some(command_type) => match command_type {
                 RunCommandType::Bool(val) => !val,
                 _ => false,
-            }
+            },
             _ => false,
         }
     }
@@ -113,6 +119,9 @@ impl LanguageConfig {
     }
     pub fn get_extension(&self) -> Option<String> {
         self.extension.clone()
+    }
+    pub fn get_template(&self) -> Option<String> {
+        self.template.clone()
     }
     pub fn to_string_from_input(&self, input: Vec<String>) -> String {
         let mut str = String::new();

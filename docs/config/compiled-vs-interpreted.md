@@ -14,7 +14,7 @@ The `template` field holds a multi-line string that will be used to create a def
 If we run the following in the terminal:
 
 ```sh
-quicker_md --lang c 'printf("Hello, from QuickerMD");' --show-input
+quicker_md run c 'printf("Hello, from QuickerMD");' --show-input
 ```
 
 The created temporary file will look:
@@ -41,7 +41,7 @@ The `redir_input` is set to true. This tells `QuickerMD` that the input passed t
 If we run the following in the terminal:
 
 ```sh
-quicker_md --lang py 'print("Hello, from QuickerMD")'
+quicker_md run py 'print("Hello, from QuickerMD")'
 ```
 
 We are essentially running the following:

@@ -16,7 +16,7 @@ pub fn main() {
 
 Running the command:
 ```sh
-quicker_md --lang rust "println!('Hello, world!');"
+quicker_md run rust "println!('Hello, world!');"
 ```
 
 Would produce the temporary file `out.rust`. While this *may* run, it is **not recommended** to use incorrect file types, as this may through warnings to the compiler.
