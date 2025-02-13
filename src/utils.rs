@@ -17,6 +17,11 @@ pub fn u8_to_str_vec(u8: Vec<u8>) -> Vec<String> {
     u8_to_str(&u8).lines().map(|s| s.to_string()).collect()
 }
 
+pub fn exit(message: &str, code: i32) -> ! {
+    eprintln!("{}", message);
+    std::process::exit(code);
+}
+
 #[cfg(test)]
 mod test {
     use crate::utils::str_vec_non_empty;
