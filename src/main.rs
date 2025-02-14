@@ -6,8 +6,8 @@ mod collect;
 mod config;
 mod templates;
 mod utils;
-mod variables;
 mod resolver;
+mod output;
 
 use crate::collect::QuickMDOutput;
 use crate::templates::Template;

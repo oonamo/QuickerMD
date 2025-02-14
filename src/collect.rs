@@ -1,6 +1,6 @@
 use crate::config::LanguageConfig;
 use crate::utils::*;
-use crate::variables::VariableParser;
+use variable_parser::VariableParser;
 use crate::Template;
 use std::io::Write;
 use std::path::PathBuf;
@@ -99,6 +99,11 @@ impl<'lang> QuickMDOutput {
                 .write_all(input.as_bytes())
                 .expect("Failed to write stdin");
         });
+
+        // TODO: Allow for ordered output
+        //       The output should follow the order
+        //       in which it would be outputed in the
+        //       terminal
         let output = child.wait_with_output().expect("failed to read stdout");
 
         let stdout = u8_to_str_vec(output.stdout);
@@ -114,7 +119,7 @@ impl<'lang> QuickMDOutput {
     pub fn run(
         file: PathBuf,
         template: &'lang Template,
-        variables: &'lang VariableParser<&str, &str>,
+        variables: &'lang VariableParser<&str>,
     ) -> std::io::Result<Self> {
         let output_file = format!("{}", file.to_str().unwrap());
         let output;
