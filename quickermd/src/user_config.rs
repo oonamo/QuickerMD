@@ -169,6 +169,18 @@ impl LanguageConfig {
         }
         None
     }
+
+    pub fn explicit_no_run(&self) -> bool {
+        match &self.run_command {
+            Some(command_type) =>{
+                match command_type {
+                    RunCommandType::Bool(val) => !val,
+                    _ => false,
+                }
+            } ,
+            None => false,
+        }
+    }
 }
 
 impl Template {

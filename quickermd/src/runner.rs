@@ -42,12 +42,12 @@ impl<'runner> QuickMDRunner<'runner> {
                 .unwrap_or(self.lang.to_string())
         ));
 
-        self.output_file = tmp_dir.path().join("out");
+        let outfile = tmp_dir.path().join("out");
         self.template.write_to_file(tmp_path.clone());
 
         let variables = vec![
             ("{{IN}}", tmp_path.to_str().unwrap()),
-            ("{{OUT}}", tmp_path.to_str().unwrap()),
+            ("{{OUT}}", outfile.to_str().unwrap()),
             ("{{INPUT}}", tmp_path.to_str().unwrap()),
         ];
 
@@ -62,12 +62,42 @@ impl<'runner> QuickMDRunner<'runner> {
 
         let output = Command::new(cmd_name).args(args).output()?;
 
-        Ok(Output::from_u8(
-            OutputType::Raw,
-            &output.stdout,
-            &output.stderr,
-            output.status,
-        ))
+        if !output.status.success() || consumed_input || self.lang_conf.explicit_no_run() {
+            drop(outfile);
+            _ = tmp_dir.close();
+
+            return Ok(Output::from_u8(
+                OutputType::Raw,
+                &output.stdout,
+                &output.stderr,
+                output.status,
+            ));
+        }
+
+        let ret = self.run_explicit(&outfile, &parser);
+
+        drop(outfile);
+        _ = tmp_dir.close();
+
+        ret
+    }
+
+    fn run_explicit(
+        &self,
+        file: &PathBuf,
+        variables: &'runner VariableParser<&str>,
+    ) -> std::io::Result<Output> {
+        let output_file = format!("{}", file.to_str().unwrap());
+        let output;
+
+        if let Some((exe_command, mut args)) = self.lang_conf.get_run_command(output_file.clone()) {
+            variables.parse_string_vec(&mut args);
+            output = Command::new(exe_command).args(args).output()?;
+        } else {
+            output = Command::new(output_file).output()?;
+        }
+
+        Ok(Output::from_u8(OutputType::Raw, &output.stdout, &output.stderr, output.status))
     }
 
     fn redirect_input(&self) -> std::io::Result<Output> {
