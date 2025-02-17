@@ -1,74 +1,59 @@
 use clap::Parser;
-use config::Config;
+use quickermd::QuickerMD;
 
 mod cli;
-mod collect;
-mod config;
-mod templates;
-mod utils;
 mod resolver;
-mod output;
+mod utils;
 
-use crate::collect::QuickMDOutput;
-use crate::templates::Template;
+fn dump_template(quicker: &QuickerMD, args: &cli::DumpArgs) {
+    let template;
+    let mut has_input = false;
 
-fn dump_template(config: &Config, args: &cli::DumpArgs) {
-    let lang_conf = resolver::lang_conf(config, &args.lang);
-    let template_string = if let Some(temp) = lang_conf.get_template() {
-        temp
+    if let Some(input) = resolver::input(&args.input) {
+        has_input = true;
+        template = quicker.get_template(&args.lang, input);
     } else {
-        utils::exit(&format!("Template does not exist for '{}'", args.lang), 1)
-    };
-
-    let input_vec = resolver::input(&args.input);
-
-    if let Some(input) = input_vec {
-        let template = Template::new(&args.lang, lang_conf, input.clone());
-        println!("{}", template.get_conf().to_string_from_input(input));
-        return;
-    } else if args.remove_template_lines {
-        let template = Template::new(&args.lang, lang_conf, Vec::with_capacity(0));
-        println!("{}", template.get_conf().to_string_from_input(Vec::with_capacity(0)));
-        return;
+        template = quicker.get_template(&args.lang, Vec::with_capacity(0));
     }
 
-    println!("{}", template_string);
+    if let Some(tmpl) = template {
+        let output;
+        if has_input {
+            output = tmpl.to_string();
+        } else {
+            output = tmpl.get_template_lines().join("\n");
+        }
+
+        println!("{}", output);
+    } else {
+        utils::exit(&format!("No template for `{}`", args.lang), 1);
+    }
 }
 
-fn run_input(config: &Config, args: &cli::RunArgs) {
-    let lang_conf = resolver::lang_conf(config, &args.lang);
-    let Some(input_vec) = resolver::input(&args.input) else { utils::exit("No Input Found", 1); };
-
-    let template = Template::new(&args.lang, lang_conf, input_vec.clone());
-    let output = QuickMDOutput::start(&template)
-        .map_err(|e| {
-            utils::exit(
-                &format!("There was an error running the program\n{}", e.to_string()),
-                1,
-            );
-        })
-        .unwrap();
-
-    let prefix_opt = if args.no_prefix {
-        None
-    } else {
-        lang_conf.get_prefix()
-    };
-    let input_opt = if args.show_input {
-        Some(input_vec)
-    } else {
-        None
+fn run_input(quicker: &mut QuickerMD, args: &cli::RunArgs) {
+    let Some(input_vec) = resolver::input(&args.input) else {
+        utils::exit("No Input Found", 1);
     };
 
-    output.output(input_opt, args.raw, prefix_opt);
+    let result = quicker
+        .run(&args.lang, input_vec.join("\n").to_string())
+        .map_err(|e| format!("Error running `{}`:\n{}", args.lang, e.to_string()));
+
+    if let Ok(output) = result {
+        println!("{}", output.to_string());
+    } else {
+        println!("{}", result.err().unwrap());
+    }
 }
 
 fn main() {
     let cli = cli::Cli::parse();
 
-    let config = Config::from_config();
+    // TODO: Handle error
+    let mut quicker = QuickerMD::new().unwrap();
+
     match cli.actions {
-        cli::QuickerActions::DumpTemplate(args) => dump_template(&config, &args),
-        cli::QuickerActions::Run(args) => run_input(&config, &args),
+        cli::QuickerActions::DumpTemplate(args) => dump_template(&quicker, &args),
+        cli::QuickerActions::Run(args) => run_input(&mut quicker, &args),
     }
 }

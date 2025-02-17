@@ -1,6 +1,4 @@
 use crate::cli;
-use crate::utils::exit;
-use crate::config::{Config, LanguageConfig};
 
 pub fn input(input: &Option<String>) -> Option<Vec<String>> {
     let is_interacitve = cli::is_interactive();
@@ -15,15 +13,4 @@ pub fn input(input: &Option<String>) -> Option<Vec<String>> {
     }
 
     Some(input_vec)
-}
-
-pub fn lang_conf<'lang>(
-    config: &'lang Config,
-    lang: &str
-    ) -> &'lang LanguageConfig {
-    if let Some(lang_conf) = config.get_lang_conf(lang) {
-        lang_conf
-    } else {
-        exit(&format!("Language Config does not exist for '{}'", lang), 1);
-    }
 }

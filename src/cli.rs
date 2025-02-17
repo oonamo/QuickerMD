@@ -25,7 +25,7 @@ pub struct DumpArgs {
     /// Whether to remove the template lines
     // TODO: Refactor template to add the ability to trim those lines
     #[arg(short, long, default_value_t = false)]
-    pub remove_template_lines: bool,
+    pub with_input: bool,
 
     /// Show the input that was used to run
     pub input: Option<String>,
