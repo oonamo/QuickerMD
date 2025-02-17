@@ -11,3 +11,4 @@ serde = { version = "1.0.217", features = ["derive"] }
 tempfile = "3.15.0"
 toml = "0.8.19"
 variable_parser = { path = "./variable_parser" }
+quickermd = { path = "./quickermd" }

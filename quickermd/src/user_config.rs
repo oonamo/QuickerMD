@@ -170,6 +170,7 @@ impl LanguageConfig {
         None
     }
 
+
     pub fn explicit_no_run(&self) -> bool {
         match &self.run_command {
             Some(command_type) =>{
@@ -185,7 +186,9 @@ impl LanguageConfig {
 
 impl Template {
     pub fn new(lang: &str, input: Vec<String>, lang_conf: &LanguageConfig) -> Self {
-        Template {
+        let input_len = input.len();
+
+        let mut template = Template {
             lines: lang_conf
                 .get_raw_template()
                 .unwrap_or("".to_string())
@@ -195,7 +198,13 @@ impl Template {
             resolved_template: String::new(),
             is_resolved: false,
             input,
+        };
+
+        if input_len != 0 {
+            template.resolve();
         }
+
+        template
     }
 
     pub fn get_input(&self) -> Vec<String> {
@@ -224,11 +233,23 @@ impl Template {
         self.is_resolved = self.lines.len() != 0;
     }
 
+    pub fn get_template_lines(&self) -> Vec<String> {
+        self.lines.clone()
+    }
+
     pub fn get_resolved_template(&self) -> String {
         if self.is_resolved {
             return self.resolved_template.clone();
         }
         self.resolve_no_mut()
+    }
+
+    pub fn set_input(&mut self, input: String) {
+        self.set_input_from_vec(input.lines().map(|s| s.to_string()).collect());
+    }
+
+    pub fn set_input_from_vec(&mut self, input: Vec<String>) {
+        self.input = input;
     }
 }
 

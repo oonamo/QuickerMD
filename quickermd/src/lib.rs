@@ -27,11 +27,17 @@ impl QuickerMD {
         todo!("handle error")
     }
 
-    fn get_template_for_lang(&self, lang: &str) -> Option<&Template> {
+    pub fn get_template_for_lang(&self, lang: &str) -> Option<&Template> {
         if let Ok(conf) = self.get_config_for_lang(lang) {
             return conf.get_template();
         }
         None
+    }
+
+    pub fn get_template(&self, lang: &str, input: Vec<String>) -> Option<Template> {
+        let lang_conf = self.get_config_for_lang(lang).unwrap();
+        let mut template = Template::new(lang, input, lang_conf);
+        Some(template)
     }
 
     pub fn run(&mut self, lang: &str, input: String) -> Result<output::Output, String> {
