@@ -53,7 +53,6 @@ mod tests {
 
     #[test]
     fn it_works() {
-        println!("Get ready...");
         let quicker_r = QuickerMD::new();
         if let Err(e) = quicker_r {
             println!("Error: {}", e);
@@ -77,10 +76,31 @@ mod tests {
         let string = output.to_string();
         println!("{}", string);
         assert_eq!(
-            output.to_string(),
+            output.to_string().trim(),
             r#"Output:
 hello
 "#
+            .trim()
         );
+    }
+
+    #[test]
+    fn can_use_compiled_languages() {
+        let mut quicker = QuickerMD::new().unwrap();
+
+        let output = quicker
+            .run("c", r#"printf("Hello, world!\n");"#.to_string())
+            .unwrap();
+
+        let string = output.to_string();
+        println!("{}", string);
+
+        assert_eq!(
+            output.to_string().trim(),
+            r#"Output:
+Hello, world!
+"#
+            .trim()
+        )
     }
 }
