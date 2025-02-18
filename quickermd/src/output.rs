@@ -1,6 +1,5 @@
 use std::process::ExitStatus;
 
-use crate::user_config::OutputType;
 use crate::utils::u8_to_str;
 use serde::{Deserialize, Serialize};
 
@@ -12,6 +11,32 @@ pub struct Output {
     stdout: Option<String>,
     stderr: Option<String>,
     code: i32,
+}
+
+#[derive(Deserialize, Serialize, Clone)]
+pub enum OutputType {
+    JSON,
+    Raw,
+}
+
+impl std::fmt::Display for OutputType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let str = match self {
+            OutputType::JSON => "json",
+            OutputType::Raw => "raw",
+        };
+
+        write!(f, "{}", str)
+    }
+}
+
+impl From<String> for OutputType {
+    fn from(value: String) -> Self {
+        match value.as_str() {
+            "json" => OutputType::JSON,
+            _ => OutputType::Raw,
+        }
+    }
 }
 
 impl Output {
@@ -58,14 +83,17 @@ impl Output {
 
         output
     }
+
+    pub fn output_as(&mut self, output_type: OutputType) {
+        self.format = output_type;
+    }
 }
 
 impl ToString for Output {
     fn to_string(&self) -> String {
         match self.format {
-            OutputType::JSON(_) => serde_json::to_string(self).unwrap(),
+            OutputType::JSON => serde_json::to_string_pretty(self).unwrap(),
             OutputType::Raw => self.raw_to_string(),
         }
-        //serde_json::to_string(self).unwrap_or(serde_json::json!(r#"{ "status": "invalid" }"#).to_string())
     }
 }

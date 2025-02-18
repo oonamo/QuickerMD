@@ -62,17 +62,6 @@ pub struct Template {
     is_resolved: bool,
 }
 
-#[derive(Deserialize, Serialize)]
-pub enum OrderedType {
-    Ascending,
-    Descending,
-}
-
-#[derive(Deserialize, Serialize)]
-pub enum OutputType {
-    JSON(Option<OrderedType>),
-    Raw,
-}
 
 impl Default for Template {
     fn default() -> Self {

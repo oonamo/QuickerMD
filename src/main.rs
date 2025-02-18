@@ -1,4 +1,5 @@
 use clap::Parser;
+use quickermd::output::OutputType;
 use quickermd::QuickerMD;
 
 mod cli;
@@ -39,7 +40,10 @@ fn run_input(quicker: &mut QuickerMD, args: &cli::RunArgs) {
         .run(&args.lang, input_vec.join("\n").to_string())
         .map_err(|e| format!("Error running `{}`:\n{}", args.lang, e.to_string()));
 
-    if let Ok(output) = result {
+    if let Ok(mut output) = result {
+        if !matches!(args.format, OutputType::Raw) {
+            output.output_as(args.format.clone().into());
+        }
         println!("{}", output.to_string());
     } else {
         println!("{}", result.err().unwrap());
