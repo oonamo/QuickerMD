@@ -110,4 +110,28 @@ Hello, world!
             .trim()
         )
     }
+
+    #[test]
+    fn can_output_as_json() {
+        let mut quicker = QuickerMD::new().unwrap();
+
+        let mut output = quicker
+            .run("py", "print('hello, from python!')".to_string())
+            .unwrap();
+
+        let raw_output = r#"
+{
+  "format": "JsonPretty",
+  "prefix": "",
+  "stdout": "hello, from python!\n",
+  "stderr": "",
+  "code": 0
+}"#.trim().replace("\r\n", "\n").replace("\t", "  ");
+
+        output.output_as(output::OutputType::JsonPretty);
+
+        let str_output = output.to_string();
+        println!("{:?}", str_output);
+        assert_eq!(raw_output.trim(), str_output.replace("\\r\\n", "\\n").trim());
+    }
 }
