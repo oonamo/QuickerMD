@@ -45,9 +45,18 @@ fn output_pretty(input: String, output: &Output, show_input: bool) -> std::io::R
 
 fn output_as_comment(quicker: &mut QuickerMD, input: String, output: &Output, args: &cli::RunArgs) {
     let output_config = resolver::output(input, output, args.show_input);
-    let comment = quicker.get_config_for_lang(&args.lang).unwrap().get_prefix().unwrap_or("".to_string());
+    let comment = quicker
+        .get_config_for_lang(&args.lang)
+        .unwrap()
+        .get_prefix()
+        .unwrap_or("".to_string());
 
     output_config.write_as_comment(&comment);
+}
+
+fn output_raw(input: String, output: &Output, args: &cli::RunArgs) {
+    let output_config = resolver::output(input, output, args.show_input);
+    output_config.write_as_comment("");
 }
 
 fn run_input(quicker: &mut QuickerMD, args: &cli::RunArgs) {
@@ -65,13 +74,13 @@ fn run_input(quicker: &mut QuickerMD, args: &cli::RunArgs) {
                 output.output_as(args.format.clone().into());
                 println!("{}", output.to_string());
             }
-            &OutputFormat::Raw => {
-                println!("{}", output.to_string());
-            }
+            OutputFormat::Raw => output_raw(input_vec.join("\n"), &output, args),
             OutputFormat::Pretty => {
-                output_pretty(input_vec.join("\n"), &output, args.show_input).unwrap();
+                output_pretty(input_vec.join("\n"), &output, args.show_input).unwrap()
             }
-            OutputFormat::Comment => output_as_comment(quicker, input_vec.join("\n"), &output, args),
+            OutputFormat::Comment => {
+                output_as_comment(quicker, input_vec.join("\n"), &output, args)
+            }
         }
     } else {
         println!("{}", result.err().unwrap());

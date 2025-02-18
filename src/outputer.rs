@@ -1,6 +1,6 @@
 use crate::cli::OutputFormat;
 use directories::ProjectDirs;
-use std::io::{Error, ErrorKind};
+use std::io::{Error, ErrorKind, IsTerminal};
 use std::str::FromStr;
 use std::{collections::HashMap, io::Write, path::PathBuf};
 use termcolor::{Buffer, BufferWriter, Color, ColorChoice, ColorSpec, WriteColor};
@@ -132,18 +132,27 @@ impl<'output> OutputArgs<'output> {
                 _ => unreachable!("Should of been checked when resolving config"),
             };
 
+            if section.value.is_empty() {
+                continue;
+            }
+
             if section.name == "input" {
                 println!("{}", section.value);
             } else {
-                println!("{} {}", comment_string, section.name);
+                println!("{}{}", comment_string, section.name);
             }
 
             for line in section.value.lines() {
-                println!("{} {}", comment_string, line);
+                println!("{}{}", comment_string, line);
             }
         }
     }
     pub fn write_pretty_to_console(&self) -> std::io::Result<()> {
+        if !std::io::stdin().is_terminal() {
+            self.write_as_comment("");
+            return Ok(());
+        }
+
         let bufwtr = BufferWriter::stdout(ColorChoice::Always);
         let mut buffer = bufwtr.buffer();
 
