@@ -8,8 +8,8 @@ use serde::{Deserialize, Serialize};
 pub struct Output {
     format: OutputType,
     prefix: String,
-    stdout: Option<String>,
-    stderr: Option<String>,
+    stdout: String,
+    stderr: String,
     code: i32,
 }
 
@@ -50,8 +50,8 @@ impl Output {
     ) -> Self {
         Output {
             format,
-            stdout,
-            stderr,
+            stdout: stdout.unwrap_or("".to_string()),
+            stderr: stderr.unwrap_or("".to_string()),
             code,
             prefix: String::new(),
         }
@@ -65,22 +65,29 @@ impl Output {
         Output {
             format,
             code: code.code().unwrap_or(0),
-            stdout: Some(u8_to_str(stdout)),
-            stderr: Some(u8_to_str(stderr)),
+            stdout: u8_to_str(stdout),
+            stderr: u8_to_str(stderr),
             prefix: String::new(),
         }
     }
-
+    pub fn has_stdout(&self) -> bool {
+        !self.stdout.is_empty()
+    }
+    pub fn has_stderr(&self) -> bool {
+        !self.stderr.is_empty()
+    }
     pub fn raw_to_string(&self) -> String {
         let mut output = String::new();
 
         let stdout = self.stdout.clone();
         let stderr = self.stderr.clone();
-        if stdout.clone().is_some_and(|s| !s.is_empty()) {
-            output.push_str(&format!("{}Output:\n{}", self.prefix, stdout.unwrap()));
+
+        if self.has_stdout() {
+            output.push_str(&format!("{}Output:\n{}", self.prefix, stdout));
         }
-        if stderr.clone().is_some_and(|s| !s.is_empty()) {
-            output.push_str(&format!("{}Error:\n{}", self.prefix, stderr.unwrap()));
+
+        if self.has_stderr() {
+            output.push_str(&format!("{}Error:\n{}", self.prefix, stderr));
         }
 
         output
