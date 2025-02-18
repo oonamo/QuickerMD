@@ -1,5 +1,5 @@
 use directories::ProjectDirs;
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 use std::io::prelude::*;
 use std::{collections::HashMap, fs::File, path::PathBuf};
 
@@ -210,10 +210,7 @@ impl Template {
             return self.resolved_template.clone();
         }
 
-        let new_string = String::new();
-        let input_collected = false;
-
-        let mut resolved_string = self.lines.join("\n");
+        let resolved_string = self.lines.join("\n");
         resolved_string.replace("{{INPUT}}", &self.input.join("\n"))
     }
 

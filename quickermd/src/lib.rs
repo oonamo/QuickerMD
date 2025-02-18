@@ -3,8 +3,6 @@ mod runner;
 mod user_config;
 mod utils;
 
-use serde::{Deserialize, Serialize};
-
 use crate::runner::QuickMDRunner;
 use crate::user_config::{Config, LanguageConfig, Template};
 
