@@ -17,7 +17,7 @@ pub struct LanguageConfig {
 
     /// The prefix to output the data with,
     /// if the user wishes
-    prefix: Option<String>,
+    comment: Option<String>,
 
     /// The file extension to use when creating a file
     /// for this language
@@ -136,8 +136,8 @@ impl LanguageConfig {
         None
     }
 
-    pub fn get_prefix(&self) -> Option<String> {
-        self.prefix.clone()
+    pub fn get_comment_string(&self) -> Option<String> {
+        self.comment.clone()
     }
 
     pub fn get_redir_input(&self) -> bool {
