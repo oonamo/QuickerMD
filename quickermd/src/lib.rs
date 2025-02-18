@@ -43,7 +43,6 @@ impl QuickerMD {
 
     pub fn run(&mut self, lang: &str, input: String) -> Result<output::Output, String> {
         let config = self.get_config_for_lang(lang)?;
-        //let template = config.get_template();
         let template = Template::new(lang, input.lines().map(|s| s.to_string()).collect(), config);
 
         let mut runner = QuickMDRunner::new(lang, &template, config, &self.config);
