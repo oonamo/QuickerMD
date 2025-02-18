@@ -1,5 +1,6 @@
 use clap::{Args, Parser, Subcommand};
 use std::io::{self, BufRead, IsTerminal};
+use quickermd::output::OutputType;
 
 #[derive(Parser)]
 #[command(version, about, long_about = None)]
@@ -48,6 +49,9 @@ pub struct RunArgs {
     #[arg(short, long, default_value_t = false)]
     pub no_prefix: bool,
 
+    /// Format style. Can be raw or json
+    #[arg(short, long, default_value_t = OutputType::Raw)]
+    pub format: OutputType,
 }
 
 pub fn is_interactive() -> bool {

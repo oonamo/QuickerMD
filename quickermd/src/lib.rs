@@ -1,7 +1,9 @@
-mod output;
+pub mod output;
 mod runner;
 mod user_config;
 mod utils;
+
+use serde::{Deserialize, Serialize};
 
 use crate::runner::QuickMDRunner;
 use crate::user_config::{Config, LanguageConfig, Template};
@@ -50,7 +52,7 @@ impl QuickerMD {
 
         runner
             .start()
-            .map_err(|e| format!("There was an error runnin!:\n{}", e.to_string()))
+            .map_err(|e| format!("There was an error running!:\n{}", e.to_string()))
     }
 }
 

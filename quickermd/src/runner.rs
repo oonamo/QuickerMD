@@ -3,7 +3,7 @@ use std::process::Stdio;
 use std::{path::PathBuf, process::Command};
 use variable_parser::VariableParser;
 
-use crate::output::Output;
+use crate::output::{OutputType, Output};
 use crate::user_config::*;
 
 pub struct QuickMDRunner<'runner> {
