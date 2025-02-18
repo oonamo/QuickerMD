@@ -10,7 +10,6 @@ pub struct QuickMDRunner<'runner> {
     template: &'runner Template,
     lang_conf: &'runner LanguageConfig,
     config: &'runner Config,
-    output_file: PathBuf,
     lang: &'runner str,
 }
 
@@ -26,7 +25,6 @@ impl<'runner> QuickMDRunner<'runner> {
             template,
             lang_conf,
             config,
-            output_file: PathBuf::new(),
         }
     }
     pub fn start(&mut self) -> std::io::Result<Output> {
@@ -43,7 +41,7 @@ impl<'runner> QuickMDRunner<'runner> {
         ));
 
         let outfile = tmp_dir.path().join("out");
-        self.template.write_to_file(tmp_path.clone());
+        self.template.write_to_file(tmp_path.clone())?;
 
         let variables = vec![
             ("{{IN}}", tmp_path.to_str().unwrap()),
