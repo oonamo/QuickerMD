@@ -45,11 +45,12 @@ fn output_pretty(input: String, output: &Output, show_input: bool) -> std::io::R
 
 fn output_as_comment(quicker: &mut QuickerMD, input: String, output: &Output, args: &cli::RunArgs) {
     let output_config = resolver::output(input, output, args.show_input);
+
     let comment = quicker
         .get_config_for_lang(&args.lang)
         .unwrap()
         .get_comment_string()
-        .unwrap_or("".to_string());
+        .unwrap_or("%s".to_string());
 
     output_config.write_as_comment(&comment);
 }

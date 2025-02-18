@@ -62,7 +62,6 @@ pub struct Template {
     is_resolved: bool,
 }
 
-
 impl Default for Template {
     fn default() -> Self {
         Self {
@@ -137,7 +136,25 @@ impl LanguageConfig {
     }
 
     pub fn get_comment_string(&self) -> Option<String> {
-        self.comment.clone()
+        if let Some(comment) = self.comment.clone() {
+            if !comment.contains("%s") {
+                if comment.chars().last().unwrap().is_whitespace() {
+                    return Some(format!("{}%s", comment));
+                }
+                return Some(format!("{} %s", comment));
+            }
+
+            return Some(comment);
+        }
+
+        None
+    }
+
+    pub fn resolve_comment_string(&self, with: &str) -> Option<String> {
+        if let Some(comment_string) = self.comment.clone() {
+            return Some(comment_string.replace("%s", with));
+        }
+        None
     }
 
     pub fn get_redir_input(&self) -> bool {
@@ -159,15 +176,12 @@ impl LanguageConfig {
         None
     }
 
-
     pub fn explicit_no_run(&self) -> bool {
         match &self.run_command {
-            Some(command_type) =>{
-                match command_type {
-                    RunCommandType::Bool(val) => !val,
-                    _ => false,
-                }
-            } ,
+            Some(command_type) => match command_type {
+                RunCommandType::Bool(val) => !val,
+                _ => false,
+            },
             None => false,
         }
     }
@@ -242,5 +256,13 @@ impl Template {
 impl ToString for Template {
     fn to_string(&self) -> String {
         self.get_resolved_template()
+    }
+}
+
+#[cfg(test)]
+mod test {
+    #[test]
+    fn it_gets_a_config_from_path() {
+        todo!();
     }
 }

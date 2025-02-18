@@ -86,6 +86,83 @@ impl<'output> Default for OutputArgs<'output> {
     }
 }
 
+pub trait SectionType {
+    fn get_value(&self) -> String;
+    fn get_name(&self) -> String;
+    fn get_icon(&self) -> String;
+    fn get_color(&self) -> String;
+    fn resolve_value<T: ToString>(&mut self, value: T);
+    fn is_empty(&self) -> bool;
+
+    fn wants_bold(&self) -> bool;
+    fn wants_italic(&self) -> bool;
+    fn wants_underline(&self) -> bool;
+    fn wants_strikethrough(&self) -> bool;
+
+    fn get_formatted_header(&self) -> String {
+        format!("{} {}", self.get_icon(), self.get_name())
+    }
+
+    fn write(&self) {
+        if self.is_empty() {
+            return;
+        }
+
+        println!("{}", self.get_value());
+    }
+
+    fn write_as_comment(&self, comment_string: &str) {
+        if self.is_empty() {
+            return;
+        }
+
+        let header_string = comment_string.replace("%s", &self.get_formatted_header());
+
+        println!("{}", header_string);
+        for line in self.get_value().lines() {
+            println!("{}", comment_string.replace("%s", line));
+        }
+    }
+
+    fn write_pretty(&self, mut buffer: &mut Buffer) -> std::io::Result<()> {
+        if self.is_empty() {
+            return Ok(());
+        }
+
+        let value = self.get_value();
+
+        let color = Color::from_str(&self.get_color()).unwrap_or_else(|_| Color::Blue);
+        let mut color_spec = ColorSpec::new();
+
+        if self.wants_bold() {
+            color_spec.set_bold(true);
+        }
+
+        if self.wants_italic() {
+            color_spec.set_italic(true);
+        }
+
+        if self.wants_underline() {
+            color_spec.set_underline(true);
+        }
+
+        if self.wants_strikethrough() {
+            color_spec.strikethrough();
+        }
+
+        color_spec.set_fg(Some(color));
+
+        buffer.set_color(&color_spec)?;
+
+        writeln!(&mut buffer, "{} {}", self.get_icon(), self.get_name())?;
+        buffer.reset()?;
+
+        writeln!(&mut buffer, "{}", value.clone())?;
+
+        Ok(())
+    }
+}
+
 #[derive(Deserialize, Debug)]
 pub struct Section {
     name: String,
@@ -112,9 +189,45 @@ pub struct Section {
     value: String,
 }
 
-impl Section {
-    pub fn resolve_value(&mut self, value: String) {
-        self.value = value;
+impl SectionType for Section {
+    fn get_value(&self) -> String {
+        self.value.clone()
+    }
+
+    fn get_name(&self) -> String {
+        self.name.clone()
+    }
+
+    fn get_icon(&self) -> String {
+        self.icon.clone()
+    }
+
+    fn get_color(&self) -> String {
+        self.color.clone()
+    }
+
+    fn resolve_value<T: ToString>(&mut self, value: T) {
+        self.value = value.to_string();
+    }
+
+    fn wants_bold(&self) -> bool {
+        self.bold
+    }
+
+    fn wants_italic(&self) -> bool {
+        self.italic
+    }
+
+    fn wants_underline(&self) -> bool {
+        self.underline
+    }
+
+    fn wants_strikethrough(&self) -> bool {
+        self.strikethrough
+    }
+
+    fn is_empty(&self) -> bool {
+        self.value.is_empty()
     }
 }
 
@@ -131,20 +244,7 @@ impl<'output> OutputArgs<'output> {
                 "error" => &self.error,
                 _ => unreachable!("Should of been checked when resolving config"),
             };
-
-            if section.value.is_empty() {
-                continue;
-            }
-
-            if section.name == "input" {
-                println!("{}", section.value);
-            } else {
-                println!("{}{}", comment_string, section.name);
-            }
-
-            for line in section.value.lines() {
-                println!("{}{}", comment_string, line);
-            }
+            section.write_as_comment(comment_string);
         }
     }
     pub fn write_pretty_to_console(&self) -> std::io::Result<()> {
@@ -164,7 +264,7 @@ impl<'output> OutputArgs<'output> {
                 _ => unreachable!("Should of been checked when resolving config"),
             };
 
-            self.write_section(&mut buffer, section)?;
+            section.write_pretty(&mut buffer);
         }
 
         bufwtr.print(&buffer)?;
@@ -173,40 +273,6 @@ impl<'output> OutputArgs<'output> {
 
     pub fn get_input(&mut self) -> &mut Section {
         &mut self.input
-    }
-
-    fn write_section(&self, mut buffer: &mut Buffer, args: &Section) -> std::io::Result<()> {
-        if !args.value.is_empty() {
-            let color = Color::from_str(&args.color).unwrap_or_else(|_| Color::Blue);
-            let mut color_spec = ColorSpec::new();
-
-            if args.bold {
-                color_spec.set_bold(true);
-            }
-
-            if args.italic {
-                color_spec.set_italic(true);
-            }
-
-            if args.underline {
-                color_spec.set_underline(true);
-            }
-
-            if args.strikethrough {
-                color_spec.strikethrough();
-            }
-
-            color_spec.set_fg(Some(color));
-
-            buffer.set_color(&color_spec)?;
-
-            writeln!(&mut buffer, "{} {}", args.icon, args.name)?;
-            buffer.reset()?;
-
-            writeln!(&mut buffer, "{}", args.value.clone())?;
-        }
-
-        Ok(())
     }
 
     pub fn get_config_from_path(
