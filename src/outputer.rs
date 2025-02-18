@@ -1,3 +1,4 @@
+use crate::cli::OutputFormat;
 use directories::ProjectDirs;
 use std::io::{Error, ErrorKind};
 use std::str::FromStr;
@@ -23,6 +24,9 @@ pub struct OutputArgs<'output> {
 
     #[serde(skip)]
     raw_input: &'output str,
+
+    #[serde(skip)]
+    style: OutputFormat,
 }
 
 pub fn default_input() -> Section {
@@ -77,6 +81,7 @@ impl<'output> Default for OutputArgs<'output> {
             output: default_output(),
             error: default_error(),
             raw_input: "",
+            style: OutputFormat::default(),
         }
     }
 }
@@ -118,7 +123,27 @@ pub fn default_icon() -> String {
 }
 
 impl<'output> OutputArgs<'output> {
-    pub fn write_to_console(&self) -> std::io::Result<()> {
+    pub fn write_as_comment(&self, comment_string: &str) {
+        for item in self.order.iter() {
+            let section = match item.as_str() {
+                "input" => &self.input,
+                "output" => &self.output,
+                "error" => &self.error,
+                _ => unreachable!("Should of been checked when resolving config"),
+            };
+
+            if section.name == "input" {
+                println!("{}", section.value);
+            } else {
+                println!("{} {}", comment_string, section.name);
+            }
+
+            for line in section.value.lines() {
+                println!("{} {}", comment_string, line);
+            }
+        }
+    }
+    pub fn write_pretty_to_console(&self) -> std::io::Result<()> {
         let bufwtr = BufferWriter::stdout(ColorChoice::Always);
         let mut buffer = bufwtr.buffer();
 
@@ -135,6 +160,10 @@ impl<'output> OutputArgs<'output> {
 
         bufwtr.print(&buffer)?;
         Ok(())
+    }
+
+    pub fn get_input(&mut self) -> &mut Section {
+        &mut self.input
     }
 
     fn write_section(&self, mut buffer: &mut Buffer, args: &Section) -> std::io::Result<()> {
