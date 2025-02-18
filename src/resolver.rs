@@ -1,4 +1,4 @@
-use crate::{cli, outputer::OutputArgs};
+use crate::{cli, outputer::{OutputArgs, SectionType}};
 use quickermd::output::Output;
 
 pub fn input(input: &Option<String>) -> Option<Vec<String>> {
