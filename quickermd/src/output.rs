@@ -16,6 +16,7 @@ pub struct Output {
 #[derive(Deserialize, Serialize, Clone)]
 pub enum OutputType {
     JSON,
+    JsonPretty,
     Raw,
 }
 
@@ -23,6 +24,7 @@ impl std::fmt::Display for OutputType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let str = match self {
             OutputType::JSON => "json",
+            OutputType::JsonPretty => "json-pretty",
             OutputType::Raw => "raw",
         };
 
@@ -92,7 +94,8 @@ impl Output {
 impl ToString for Output {
     fn to_string(&self) -> String {
         match self.format {
-            OutputType::JSON => serde_json::to_string_pretty(self).unwrap(),
+            OutputType::JSON => serde_json::to_string(self).unwrap(),
+            OutputType::JsonPretty => serde_json::to_string_pretty(self).unwrap(),
             OutputType::Raw => self.raw_to_string(),
         }
     }

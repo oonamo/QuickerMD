@@ -73,7 +73,7 @@ mod tests {
     }
 
     #[test]
-    fn can_retrieve_simple_output() {
+    fn it_retrieves_simple_output() {
         let mut quicker = QuickerMD::new().unwrap();
 
         let output = quicker
@@ -92,7 +92,7 @@ hello
     }
 
     #[test]
-    fn can_use_compiled_languages() {
+    fn it_runs_compiled_languages() {
         let mut quicker = QuickerMD::new().unwrap();
 
         let output = quicker
@@ -112,14 +112,14 @@ Hello, world!
     }
 
     #[test]
-    fn can_output_as_json() {
+    fn it_outputs_as_json() {
         let mut quicker = QuickerMD::new().unwrap();
 
         let mut output = quicker
             .run("py", "print('hello, from python!')".to_string())
             .unwrap();
 
-        let raw_output = r#"
+        let pretty_raw_output = r#"
 {
   "format": "JsonPretty",
   "prefix": "",
@@ -131,7 +131,14 @@ Hello, world!
         output.output_as(output::OutputType::JsonPretty);
 
         let str_output = output.to_string();
+
         println!("{:?}", str_output);
-        assert_eq!(raw_output.trim(), str_output.replace("\\r\\n", "\\n").trim());
+        assert_eq!(pretty_raw_output, str_output.replace("\\r\\n", "\\n").trim());
+
+        let raw_input = r#"{"format":"JSON","prefix":"","stdout":"hello, from python!\n","stderr":"","code":0}"#;
+        output.output_as(output::OutputType::JSON);
+
+        let json_output = output.to_string();
+        assert_eq!(raw_input, json_output.replace("\\r\\n", "\\n".trim()));
     }
 }
