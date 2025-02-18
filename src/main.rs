@@ -8,6 +8,7 @@ mod cli;
 mod outputer;
 mod resolver;
 mod utils;
+use crate::cli::OutputFormat;
 use crate::outputer::OutputArgs;
 
 fn dump_template(quicker: &QuickerMD, args: &cli::DumpArgs) {
@@ -35,18 +36,18 @@ fn dump_template(quicker: &QuickerMD, args: &cli::DumpArgs) {
     }
 }
 
-fn output_pretty(input: String, output: Output) -> std::io::Result<()> {
-    let output_config =
-        OutputArgs::get_config(input.clone(), output.get_stdout(), output.get_stderr())
-            .unwrap_or_else(|_| {
-                let mut conf = OutputArgs::default();
-                conf.set_reserved_section_values(input, output.get_stdout(), output.get_stderr());
-                conf
-            });
-
-    output_config.write_to_console()?;
+fn output_pretty(input: String, output: &Output, show_input: bool) -> std::io::Result<()> {
+    let output_config = resolver::output(input, output, show_input);
+    output_config.write_pretty_to_console()?;
 
     Ok(())
+}
+
+fn output_as_comment(quicker: &mut QuickerMD, input: String, output: &Output, args: &cli::RunArgs) {
+    let output_config = resolver::output(input, output, args.show_input);
+    let comment = quicker.get_config_for_lang(&args.lang).unwrap().get_prefix().unwrap_or("".to_string());
+
+    output_config.write_as_comment(&comment);
 }
 
 fn run_input(quicker: &mut QuickerMD, args: &cli::RunArgs) {
@@ -60,13 +61,17 @@ fn run_input(quicker: &mut QuickerMD, args: &cli::RunArgs) {
 
     if let Ok(mut output) = result {
         match &args.format {
-            OutputType::JSON | OutputType::JsonPretty => {
-                output.output_as(args.format.clone());
+            OutputFormat::Json | &OutputFormat::JsonPretty => {
+                output.output_as(args.format.clone().into());
                 println!("{}", output.to_string());
             }
-            OutputType::Raw => {
-                output_pretty(input_vec.join("\n"), output).unwrap();
+            &OutputFormat::Raw => {
+                println!("{}", output.to_string());
             }
+            OutputFormat::Pretty => {
+                output_pretty(input_vec.join("\n"), &output, args.show_input).unwrap();
+            }
+            OutputFormat::Comment => output_as_comment(quicker, input_vec.join("\n"), &output, args),
         }
     } else {
         println!("{}", result.err().unwrap());

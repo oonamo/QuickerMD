@@ -1,6 +1,6 @@
-use clap::{Args, Parser, Subcommand};
-use std::io::{self, BufRead, IsTerminal};
+use clap::{Args, Parser, Subcommand, ValueEnum};
 use quickermd::output::OutputType;
+use std::io::{self, BufRead, IsTerminal};
 
 #[derive(Parser)]
 #[command(version, about, long_about = None)]
@@ -45,13 +45,59 @@ pub struct RunArgs {
     #[arg(short, long, default_value_t = false)]
     pub raw: bool,
 
-    /// Don't show the prefix
-    #[arg(short, long, default_value_t = false)]
-    pub no_prefix: bool,
+    /// Format style
+    #[arg(value_enum, short, long, default_value_t = OutputFormat::Pretty)]
+    pub format: OutputFormat,
+}
 
-    /// Format style. Can be raw or json
-    #[arg(short, long, default_value_t = OutputType::Raw)]
-    pub format: OutputType,
+#[derive(Clone, ValueEnum, Debug)]
+pub enum OutputFormat {
+    Json,
+    JsonPretty,
+    Pretty,
+    Comment,
+    Raw,
+}
+
+impl Default for OutputFormat {
+    fn default() -> Self {
+        OutputFormat::Pretty
+    }
+}
+
+impl From<String> for OutputFormat {
+    fn from(value: String) -> Self {
+        match value.to_lowercase().as_str() {
+            "json" => OutputFormat::Json,
+            "json-pretty" => OutputFormat::JsonPretty,
+            "pretty" => OutputFormat::Pretty,
+            "comment" => OutputFormat::Comment,
+            _ => OutputFormat::Raw,
+        }
+    }
+}
+
+impl std::fmt::Display for OutputFormat {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let str = match self {
+            OutputFormat::Json => "json",
+            OutputFormat::JsonPretty => "json-pretty",
+            OutputFormat::Pretty => "pretty",
+            OutputFormat::Comment => "comment",
+            OutputFormat::Raw => "raw",
+        };
+        write!(f, "{}", str)
+    }
+}
+
+impl Into<OutputType> for OutputFormat {
+    fn into(self) -> OutputType {
+        match self {
+            OutputFormat::Json => OutputType::JSON,
+            OutputFormat::JsonPretty => OutputType::JsonPretty,
+            _ => OutputType::Raw,
+        }
+    }
 }
 
 pub fn is_interactive() -> bool {
