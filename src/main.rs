@@ -48,7 +48,7 @@ fn output_as_comment(quicker: &mut QuickerMD, input: String, output: &Output, ar
     let comment = quicker
         .get_config_for_lang(&args.lang)
         .unwrap()
-        .get_prefix()
+        .get_comment_string()
         .unwrap_or("".to_string());
 
     output_config.write_as_comment(&comment);
