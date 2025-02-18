@@ -96,6 +96,26 @@ impl Output {
     pub fn output_as(&mut self, output_type: OutputType) {
         self.format = output_type;
     }
+
+    pub fn get_stdout(&self) -> String {
+        self.stdout.clone()
+    }
+
+    pub fn get_stderr(&self) -> String {
+        self.stderr.clone()
+    }
+
+    pub fn get_exit_code(&self) -> i32 {
+        self.code
+    }
+
+    pub fn get_prefix(&self) -> String {
+        self.prefix.clone()
+    }
+
+    pub fn get_format(&self) -> OutputType {
+        self.format.clone()
+    }
 }
 
 impl ToString for Output {
