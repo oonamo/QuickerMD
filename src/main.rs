@@ -47,46 +47,6 @@ fn output_pretty(input: String, output: Output) -> std::io::Result<()> {
     output_config.write_to_console()?;
 
     Ok(())
-    //let mut bufwtr = BufferWriter::stdout(ColorChoice::Always);
-    //let mut buffer = bufwtr.buffer();
-    //
-    //if show_input {
-    //    buffer.set_color(ColorSpec::new().set_fg(Some(Color::Blue)).set_bold(true))?;
-    //
-    //    writeln!(&mut buffer, "# Output")?;
-    //    buffer.reset()?;
-    //
-    //    writeln!(&mut buffer, "{}", output.get_stdout())?;
-    //
-    //    bufwtr.print(&buffer)?;
-    //}
-    //
-    //if output.has_stdout() {
-    //    buffer.set_color(ColorSpec::new().set_fg(Some(Color::Green)).set_bold(true))?;
-    //
-    //    writeln!(&mut buffer, "# Output")?;
-    //    buffer.reset()?;
-    //
-    //    writeln!(&mut buffer, "{}", output.get_stdout())?;
-    //
-    //    bufwtr.print(&buffer)?;
-    //}
-    //
-    //if output.has_stderr() {
-    //    buffer.set_color(ColorSpec::new().set_fg(Some(Color::Red)).set_bold(true))?;
-    //
-    //    writeln!(&mut buffer, "# Error")?;
-    //    buffer.reset()?;
-    //
-    //    writeln!(&mut buffer, "{}", output.get_stderr())?;
-    //    bufwtr.print(&buffer)?;
-    //}
-    //
-    //buffer.reset()?;
-    //Ok(())
-
-    // TODO: Handle error case
-    //buffer.set_color(ColorSpec::new().set_fg(Some(Color::Green))).unwrap();
 }
 
 fn run_input(quicker: &mut QuickerMD, args: &cli::RunArgs) {
@@ -108,10 +68,6 @@ fn run_input(quicker: &mut QuickerMD, args: &cli::RunArgs) {
                 output_pretty(input_vec.join("\n"), output).unwrap();
             }
         }
-        //if !matches!(args.format, OutputType::Raw) {
-        //    output.output_as(args.format.clone().into());
-        //}
-        //output_pretty(input_vec.join("\n"), output).unwrap();
     } else {
         println!("{}", result.err().unwrap());
     }

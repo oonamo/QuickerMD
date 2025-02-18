@@ -1,4 +1,4 @@
-workspace = { members = [ "colorme", "quickermd","variable_parser"] }
+workspace = { members = ["quickermd", "variable_parser"] }
 [package]
 name = "quicker_md"
 version = "0.1.0"
