@@ -152,7 +152,7 @@ impl LanguageConfig {
     /// use std::path::PathBuf;
     /// 
     /// # fn main() -> Result<(), String> {
-    /// let config = QuickerMD::new()?;
+    /// let config = QuickerMD::from_file_path(PathBuf::from("../examples/config.toml"))?;
     /// let c_config = config.get_config_for_lang("c")?;
     /// assert_eq!(c_config.get_command_args(), vec![
     ///     "{{IN}}".to_string(),
