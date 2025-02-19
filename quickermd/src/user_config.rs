@@ -261,8 +261,74 @@ impl ToString for Template {
 
 #[cfg(test)]
 mod test {
+    use super::*;
+    fn get_exmaple_config() -> Config {
+        Config::get_config_from_path(PathBuf::from("../examples/config.toml")).unwrap()
+    }
+
     #[test]
     fn it_gets_a_config_from_path() {
-        todo!();
+        _ = get_exmaple_config();
+    }
+
+    #[test]
+    fn it_gets_an_existing_language() {
+        let config = get_exmaple_config();
+
+        _ = config.get_lang_conf("c").unwrap();
+    }
+
+    #[test]
+    #[should_panic]
+    fn it_panics_on_non_existing_language() {
+        let config = get_exmaple_config();
+
+        config.get_lang_conf("NON EXISTING LANGUAGE").unwrap();
+    }
+
+    #[test]
+    fn it_correctly_resolves_template() {
+        let config = get_exmaple_config();
+        let c_conf = config.get_lang_conf("c").unwrap();
+
+        let c_raw_template = c_conf.get_raw_template().unwrap();
+
+        assert_eq!(
+            r#"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+int main() {
+  {{INPUT}}
+}
+"#
+            .trim(),
+            c_raw_template.trim(),
+            "Raw template has been changed. Update this test"
+        );
+
+        let c_template = Template::new(
+            "c",
+            vec![r#"printf("Hello, QuickerMD!\n");"#.to_string()],
+            c_conf,
+        );
+
+        let resolve_template = c_template.get_resolved_template();
+
+        assert_eq!(
+            resolve_template.trim(),
+            r#"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+int main() {
+  printf("Hello, QuickerMD!\n");
+}
+"#
+            .trim()
+        )
+    }
     }
 }
