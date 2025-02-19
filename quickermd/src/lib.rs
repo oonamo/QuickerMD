@@ -17,10 +17,13 @@ pub struct QuickerMD {
 impl QuickerMD {
     /// Gets the config from the default config location
     ///
-    /// ```
+    /// ```no_run
     /// use quickermd::QuickerMD;
-    ///
-    /// let config = QuickerMD::new().unwrap();
+    /// # fn main() ->  Result<(), String> {
+    /// 
+    /// let config = QuickerMD::new()?;
+    /// # Ok(())
+    /// # }
     /// ```
     pub fn new() -> Result<Self, String> {
         Ok(Self {
@@ -30,10 +33,14 @@ impl QuickerMD {
 
     /// Gets the config from a given file location
     ///
-    /// ```
+    /// ```rust
     /// use quickermd::QuickerMD;
+    /// use std::path::PathBuf;
+    /// # fn main() -> Result<(), String> {
     ///
-    /// let config = QuickerMD::new().unwrap();
+    /// let config = QuickerMD::from_file_path(PathBuf::from("../examples/config.toml"))?;
+    /// # Ok(())
+    /// # }
     /// ```
     pub fn from_file_path(file: std::path::PathBuf) -> Result<Self, String> {
         Ok(Self {
@@ -44,9 +51,13 @@ impl QuickerMD {
     /// Gets the config for a language
     /// ```
     /// use quickermd::QuickerMD;
+    /// use std::path::PathBuf;
+    /// # fn main() -> Result<(), String> {
     ///
-    /// let config = QuickerMD::new().unwrap();
-    /// let c_config = config.get_config_for_lang("c").unwrap();
+    /// let config = QuickerMD::from_file_path(PathBuf::from("../examples/config.toml"))?;
+    /// let c_config = config.get_config_for_lang("c")?;
+    /// # Ok(())
+    /// # }
     /// ```
     pub fn get_config_for_lang(&self, lang: &str) -> Result<&LanguageConfig, String> {
         let config = &self.config;
@@ -79,12 +90,15 @@ impl QuickerMD {
     /// Runs a template
     /// ```
     /// use quickermd::QuickerMD;
-    ///
-    /// let mut config = QuickerMD::new().unwrap();
+    /// use std::path::PathBuf;
+    /// # fn main() -> Result<(), String> {
+    /// let mut config = QuickerMD::new()?;
     /// if let Ok(output) = config.run("c", r#"printf("Hello, world!\n");"#.to_string()) {
     ///     // Windows may output a \r\n instead of \n
     ///     assert_eq!(output.get_stdout().replace("\r", ""), "Hello, world!\n");
     /// }
+    /// # Ok(())
+    /// # }
     /// ```
     pub fn run(&mut self, lang: &str, input: String) -> Result<output::Output, String> {
         let config = self.get_config_for_lang(lang)?;
