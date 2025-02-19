@@ -92,11 +92,11 @@ impl QuickerMD {
     /// use quickermd::QuickerMD;
     /// use std::path::PathBuf;
     /// # fn main() -> Result<(), String> {
-    /// let mut config = QuickerMD::new()?;
-    /// if let Ok(output) = config.run("c", r#"printf("Hello, world!\n");"#.to_string()) {
-    ///     // Windows may output a \r\n instead of \n
-    ///     assert_eq!(output.get_stdout().replace("\r", ""), "Hello, world!\n");
-    /// }
+    /// let mut config = QuickerMD::from_file_path(PathBuf::from("../examples/config.toml"))?;
+    /// let output = config.run("c", r#"printf("Hello, world!\n");"#.to_string())?;
+    /// 
+    /// assert_eq!(output.get_exit_code(), 0);
+    /// assert_eq!(output.get_stdout().replace("\r", ""), "Hello, world!\n");
     /// # Ok(())
     /// # }
     /// ```

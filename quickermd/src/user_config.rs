@@ -124,12 +124,17 @@ impl LanguageConfig {
     /// [langs.c]
     /// command = ["gcc", "-o", "{{OUT}}", "{{IN}}"]
     /// ```
+    ///
     /// ```
     /// use quickermd::QuickerMD;
+    /// use std::path::PathBuf;
     /// 
-    /// let config = QuickerMD::new().unwrap();
-    /// let c_config = config.get_config_for_lang("c").unwrap();
+    /// # fn main() -> Result<(), String> {
+    /// let config = QuickerMD::from_file_path(PathBuf::from("../examples/config.toml"))?;
+    /// let c_config = config.get_config_for_lang("c")?;
     /// assert_eq!(c_config.get_command_name(), "gcc");
+    /// # Ok(())
+    /// # }
     /// ```
     pub fn get_command_name(&self) -> String {
         self.compile_command[0].clone()
@@ -144,14 +149,18 @@ impl LanguageConfig {
     /// ```
     /// ```
     /// use quickermd::QuickerMD;
+    /// use std::path::PathBuf;
     /// 
-    /// let config = QuickerMD::new().unwrap();
-    /// let c_config = config.get_config_for_lang("c").unwrap();
+    /// # fn main() -> Result<(), String> {
+    /// let config = QuickerMD::new()?;
+    /// let c_config = config.get_config_for_lang("c")?;
     /// assert_eq!(c_config.get_command_args(), vec![
     ///     "{{IN}}".to_string(),
     ///     "-o".to_string(),
     ///     "{{OUT}}".to_string(),
     /// ]);
+    /// # Ok(())
+    /// # }
     /// ```
     pub fn get_command_args(&self) -> Vec<String> {
         self.compile_command.iter().skip(1).cloned().collect()
