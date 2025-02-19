@@ -1,0 +1,46 @@
+[langs.c]
+command = ["gcc", "{{IN}}", "-o", "{{OUT}}"]
+comment = "// "
+template ="""
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+int main() {
+  {{INPUT}}
+}
+"""
+
+[langs.js]
+command = ["node"]
+comment = "// "
+redir_input = true
+
+[langs.py]
+command = ["python"]
+comment = "# "
+redir_input = true
+
+[langs.python]
+command = ["python", "{{IN}}"]
+template = """
+import matplotlib.pyplot as plt
+
+{{INPUT}}
+"""
+run = false
+extension = "py"
+
+[langs.ps1]
+command = ["pwsh", "-NoProfile", "-NonInteractive", "-Command", "{{INPUT}}"]
+comment = "# "
+
+[langs.rust]
+extension = "rs"
+command = ["rustc", "{{IN}}", "-o", "{{OUT}}"]
+comment = "// "
+template = """
+pub fn main() {
+  {{INPUT}}
+}
+"""

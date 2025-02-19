@@ -105,6 +105,10 @@ impl Config {
     pub fn get_lang_conf(&self, lang: &str) -> Option<&LanguageConfig> {
         self.langs.get(lang)
     }
+
+    pub fn get_mut_lang_conf(&mut self, lang: &str) -> Option<&mut LanguageConfig> {
+        self.langs.get_mut(lang)
+    }
 }
 
 impl LanguageConfig {
@@ -133,6 +137,15 @@ impl LanguageConfig {
         }
 
         None
+    }
+
+    #[cfg(test)]
+    pub fn get_raw_comment_string(&self) -> Option<String> {
+        self.comment.clone()
+    }
+
+    pub fn set_raw_comment_string(&mut self, comment: String) {
+        self.comment = Some(comment);
     }
 
     pub fn get_comment_string(&self) -> Option<String> {
@@ -330,5 +343,52 @@ int main() {
             .trim()
         )
     }
+
+    #[test]
+    pub fn it_adds_a_whitespace_to_resolved_string_if_it_dne() {
+        let mut config = get_exmaple_config();
+
+        let js_conf = config.get_mut_lang_conf("js").unwrap();
+
+        js_conf.set_raw_comment_string("//".to_string());
+
+        assert_eq!(js_conf.get_raw_comment_string().unwrap(), "//");
+        assert_eq!(js_conf.get_comment_string().unwrap(), "// %s");
+    }
+
+    #[test]
+    pub fn it_does_not_whitespace_to_comment_if_ends_with_ws() {
+        let mut config = get_exmaple_config();
+
+        let py_conf = config.get_mut_lang_conf("py").unwrap();
+
+        py_conf.set_raw_comment_string("# ".to_string());
+
+        assert_eq!(py_conf.get_raw_comment_string().unwrap(), "# ");
+        assert_eq!(py_conf.get_comment_string().unwrap(), "# %s");
+    }
+
+    #[test]
+    pub fn it_adds_formats_specifier_to_comment_if_it_dne() {
+        let mut config = get_exmaple_config();
+
+        let c_conf = config.get_mut_lang_conf("c").unwrap();
+
+        c_conf.set_raw_comment_string("// ".to_string());
+
+        assert_eq!(c_conf.get_raw_comment_string().unwrap(), "// ");
+        assert_eq!(c_conf.get_comment_string().unwrap(), "// %s");
+    }
+
+    #[test]
+    pub fn it_does_not_add_format_specifier_if_exists() {
+        let mut config = get_exmaple_config();
+
+        let c_conf = config.get_mut_lang_conf("c").unwrap();
+
+        c_conf.set_raw_comment_string("/* %s */".to_string());
+
+        assert_eq!(c_conf.get_raw_comment_string().unwrap(), "/* %s */");
+        assert_eq!(c_conf.get_comment_string().unwrap(), "/* %s */");
     }
 }
