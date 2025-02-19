@@ -25,12 +25,9 @@ The created temporary file will look:
 #include <string.h>
 
 int main() {
-printf("Hello, from QuickerMD");
+    printf("Hello, from QuickerMD");
 }
 ```
-
-??? WARNING
-    Notice that `QuickerMD` does not add indents to the input? This *may* be a **problem** for white-space sensitive languages such as `python`.
 
 ## Python (Interpreted)
 The `command` field has just `python` in the array.
