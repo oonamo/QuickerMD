@@ -28,6 +28,19 @@ impl QuickerMD {
         })
     }
 
+    /// Gets the config from a given file location
+    ///
+    /// ```
+    /// use quickermd::QuickerMD;
+    ///
+    /// let config = QuickerMD::new().unwrap();
+    /// ```
+    pub fn from_file_path(file: std::path::PathBuf) -> Result<Self, String> {
+        Ok(Self {
+            config: Config::get_config_from_path(file)?,
+        })
+    }
+
     /// Gets the config for a language
     /// ```
     /// use quickermd::QuickerMD;
@@ -106,22 +119,21 @@ pub fn format_comment_string<T: ToString>(comment_string: &str, with: T) -> Stri
 mod tests {
     use super::*;
 
+    fn get_example_config() -> QuickerMD {
+        QuickerMD::from_file_path(std::path::PathBuf::from("../examples/config.toml")).unwrap()
+    }
+
     #[test]
     fn it_works() {
-        let quicker_r = QuickerMD::new();
-        if let Err(e) = quicker_r {
-            println!("Error: {}", e);
-            panic!("{}", e);
-        }
-        quicker_r
-            .unwrap()
+        let mut quicker = get_example_config();
+        quicker
             .run("js", "console.log('hello')".to_string())
             .unwrap();
     }
 
     #[test]
     fn it_retrieves_simple_output() {
-        let mut quicker = QuickerMD::new().unwrap();
+        let mut quicker = get_example_config();
 
         let output = quicker
             .run("js", "console.log('hello')".to_string())
@@ -140,7 +152,7 @@ hello
 
     #[test]
     fn it_runs_compiled_languages() {
-        let mut quicker = QuickerMD::new().unwrap();
+        let mut quicker = get_example_config();
 
         let output = quicker
             .run("c", r#"printf("Hello, world!\n");"#.to_string())
@@ -160,7 +172,7 @@ Hello, world!
 
     #[test]
     fn it_outputs_as_json() {
-        let mut quicker = QuickerMD::new().unwrap();
+        let mut quicker = get_example_config();
 
         let mut output = quicker
             .run("py", "print('hello, from python!')".to_string())
@@ -187,7 +199,8 @@ Hello, world!
             str_output.replace("\\r\\n", "\\n").trim()
         );
 
-        let raw_input = r#"{"format":"JSON","stdout":"hello, from python!\n","stderr":"","code":0}"#;
+        let raw_input =
+            r#"{"format":"JSON","stdout":"hello, from python!\n","stderr":"","code":0}"#;
         output.output_as(output::OutputType::JSON);
 
         let json_output = output.to_string();
