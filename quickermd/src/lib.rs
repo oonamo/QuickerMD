@@ -53,6 +53,10 @@ impl QuickerMD {
     }
 }
 
+pub fn format_comment_string<T: ToString>(comment_string: &str, with: T) -> String {
+    comment_string.replace("%s", &with.to_string())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -125,19 +129,34 @@ Hello, world!
   "stdout": "hello, from python!\n",
   "stderr": "",
   "code": 0
-}"#.trim().replace("\r\n", "\n").replace("\t", "  ");
+}"#
+        .trim()
+        .replace("\r\n", "\n")
+        .replace("\t", "  ");
 
         output.output_as(output::OutputType::JsonPretty);
 
         let str_output = output.to_string();
 
         println!("{:?}", str_output);
-        assert_eq!(pretty_raw_output, str_output.replace("\\r\\n", "\\n").trim());
+        assert_eq!(
+            pretty_raw_output,
+            str_output.replace("\\r\\n", "\\n").trim()
+        );
 
         let raw_input = r#"{"format":"JSON","prefix":"","stdout":"hello, from python!\n","stderr":"","code":0}"#;
         output.output_as(output::OutputType::JSON);
 
         let json_output = output.to_string();
         assert_eq!(raw_input, json_output.replace("\\r\\n", "\\n".trim()));
+    }
+
+    #[test]
+    fn it_formats_a_comment_string() {
+        let comment_string = "// %s";
+
+        let new_string = format_comment_string(comment_string, "QuickMD Output");
+
+        assert_eq!(new_string, "// QuickMD Output");
     }
 }
