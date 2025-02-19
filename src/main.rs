@@ -1,15 +1,12 @@
 use clap::Parser;
-use quickermd::output::{Output, OutputType};
+use quickermd::output::Output;
 use quickermd::QuickerMD;
-use std::io::Write;
-use termcolor::{BufferWriter, Color, ColorChoice, ColorSpec, WriteColor};
 
 mod cli;
 mod outputer;
 mod resolver;
 mod utils;
 use crate::cli::OutputFormat;
-use crate::outputer::OutputArgs;
 
 fn dump_template(quicker: &QuickerMD, args: &cli::DumpArgs) {
     let template;
