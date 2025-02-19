@@ -16,9 +16,7 @@ namespace QuickerMD
     {
         static void Main(string[] args)
         {
-            <<< TEMPLATE START
-
-            <<< TEMPLATE END
+            {{INPUT}}
         }
     }
 }

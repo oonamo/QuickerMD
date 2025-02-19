@@ -7,9 +7,7 @@ In the following case:
 command = ["rustc", "{{IN}}", "-o", "{{OUT}}"]
 template = """
 pub fn main() {
-    <<< TEMPLATE START
-
-    <<< TEMPLATE END
+    {{INPUT}}
 }
 """
 ```
@@ -30,9 +28,7 @@ extension = "rs"
 command = ["rustc", "{{IN}}", "-o", "{{OUT}}"]
 template = """
 pub fn main() {
-    <<< TEMPLATE START
-
-    <<< TEMPLATE END
+    {{INPUT}}
 }
 """
 ```
