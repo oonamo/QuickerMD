@@ -1,22 +1,40 @@
 pub mod output;
 mod runner;
-mod user_config;
+pub mod user_config;
 mod utils;
 
 use crate::runner::QuickMDRunner;
 use crate::user_config::{Config, LanguageConfig, Template};
 
+/// # Quicker MD
+///
+/// This struct defines the entry point for most integrations
 pub struct QuickerMD {
+    /// The Users Config
     config: Config,
 }
 
 impl QuickerMD {
+    /// Gets the config from the default config location
+    ///
+    /// ```
+    /// use quickermd::QuickerMD;
+    ///
+    /// let config = QuickerMD::new().unwrap();
+    /// ```
     pub fn new() -> Result<Self, String> {
         Ok(Self {
             config: Config::get_config()?,
         })
     }
 
+    /// Gets the config for a language
+    /// ```
+    /// use quickermd::QuickerMD;
+    ///
+    /// let config = QuickerMD::new().unwrap();
+    /// let c_config = config.get_config_for_lang("c").unwrap();
+    /// ```
     pub fn get_config_for_lang(&self, lang: &str) -> Result<&LanguageConfig, String> {
         let config = &self.config;
 
@@ -27,6 +45,9 @@ impl QuickerMD {
         todo!("handle error")
     }
 
+    /// Returns the template for a language
+    ///
+    /// **Prefer `QuickerMD::get_template`**
     pub fn get_template_for_lang(&self, lang: &str) -> Option<&Template> {
         if let Ok(conf) = self.get_config_for_lang(lang) {
             return conf.get_template();
@@ -34,6 +55,7 @@ impl QuickerMD {
         None
     }
 
+    /// Returns a resolved template for a language
     pub fn get_template(&self, lang: &str, input: Vec<String>) -> Option<Template> {
         if let Ok(lang_conf) = self.get_config_for_lang(lang) {
             return Some(Template::new(lang, input, lang_conf));
@@ -41,6 +63,16 @@ impl QuickerMD {
         None
     }
 
+    /// Runs a template
+    /// ```
+    /// use quickermd::QuickerMD;
+    ///
+    /// let mut config = QuickerMD::new().unwrap();
+    /// if let Ok(output) = config.run("c", r#"printf("Hello, world!\n");"#.to_string()) {
+    ///     // Windows may output a \r\n instead of \n
+    ///     assert_eq!(output.get_stdout().replace("\r", ""), "Hello, world!\n");
+    /// }
+    /// ```
     pub fn run(&mut self, lang: &str, input: String) -> Result<output::Output, String> {
         let config = self.get_config_for_lang(lang)?;
         let template = Template::new(lang, input.lines().map(|s| s.to_string()).collect(), config);
@@ -53,6 +85,19 @@ impl QuickerMD {
     }
 }
 
+/// Formats a comment string
+///
+/// ```
+/// use quickermd::format_comment_string;
+///
+/// let comment_string = "/* %s */"; // C, CSS comment string
+///
+/// let with = "QuickMD Output";
+///
+/// let output = format_comment_string(comment_string, with);
+///
+/// assert_eq!("/* QuickMD Output */".to_string(), output);
+/// ```
 pub fn format_comment_string<T: ToString>(comment_string: &str, with: T) -> String {
     comment_string.replace("%s", &with.to_string())
 }
@@ -68,7 +113,6 @@ mod tests {
             println!("Error: {}", e);
             panic!("{}", e);
         }
-        //let mut quicker = QuickerMD::new();
         quicker_r
             .unwrap()
             .run("js", "console.log('hello')".to_string())
@@ -125,7 +169,6 @@ Hello, world!
         let pretty_raw_output = r#"
 {
   "format": "JsonPretty",
-  "prefix": "",
   "stdout": "hello, from python!\n",
   "stderr": "",
   "code": 0
@@ -144,7 +187,7 @@ Hello, world!
             str_output.replace("\\r\\n", "\\n").trim()
         );
 
-        let raw_input = r#"{"format":"JSON","prefix":"","stdout":"hello, from python!\n","stderr":"","code":0}"#;
+        let raw_input = r#"{"format":"JSON","stdout":"hello, from python!\n","stderr":"","code":0}"#;
         output.output_as(output::OutputType::JSON);
 
         let json_output = output.to_string();

@@ -4,16 +4,15 @@ use crate::utils::u8_to_str;
 use serde::{Deserialize, Serialize};
 
 #[derive(Deserialize, Serialize)]
-// TODO: with_input, no_prefix
 pub struct Output {
     format: OutputType,
-    prefix: String,
     stdout: String,
     stderr: String,
     code: i32,
 }
 
 #[derive(Deserialize, Serialize, Clone)]
+/// Describes how the `to_string` function will behave
 pub enum OutputType {
     JSON,
     JsonPretty,
@@ -42,6 +41,7 @@ impl From<String> for OutputType {
 }
 
 impl Output {
+    /// Creates a new instance of `Output`
     pub fn new(
         format: OutputType,
         stdout: Option<String>,
@@ -53,9 +53,9 @@ impl Output {
             stdout: stdout.unwrap_or("".to_string()),
             stderr: stderr.unwrap_or("".to_string()),
             code,
-            prefix: String::new(),
         }
     }
+    /// Creates a new instance of `Output` using a vector of bytes
     pub fn from_u8(
         format: OutputType,
         stdout: &Vec<u8>,
@@ -67,15 +67,24 @@ impl Output {
             code: code.code().unwrap_or(0),
             stdout: u8_to_str(stdout),
             stderr: u8_to_str(stderr),
-            prefix: String::new(),
         }
     }
+    /// Checks if `stdout` is non-empty
     pub fn has_stdout(&self) -> bool {
         !self.stdout.is_empty()
     }
+    /// Checks if `stderr` is non-empty
     pub fn has_stderr(&self) -> bool {
         !self.stderr.is_empty()
     }
+    /// The *raw* implementation for `to_string`
+    /// Returns a raw string in the format of:
+    /// ```text
+    /// Output:
+    /// Hello, World
+    /// Error:
+    /// Hello, Error
+    /// ```
     pub fn raw_to_string(&self) -> String {
         let mut output = String::new();
 
@@ -83,36 +92,37 @@ impl Output {
         let stderr = self.stderr.clone();
 
         if self.has_stdout() {
-            output.push_str(&format!("{}Output:\n{}", self.prefix, stdout));
+            output.push_str(&format!("Output:\n{}", stdout));
         }
 
         if self.has_stderr() {
-            output.push_str(&format!("{}Error:\n{}", self.prefix, stderr));
+            output.push_str(&format!("Error:\n{}", stderr));
         }
 
         output
     }
 
+    /// Sets the output `format`
     pub fn output_as(&mut self, output_type: OutputType) {
         self.format = output_type;
     }
 
+    /// Returns the `stdout`
     pub fn get_stdout(&self) -> String {
         self.stdout.clone()
     }
 
+    /// Returns the `stderr`
     pub fn get_stderr(&self) -> String {
         self.stderr.clone()
     }
 
+    /// Returns the exit `code`
     pub fn get_exit_code(&self) -> i32 {
         self.code
     }
 
-    pub fn get_prefix(&self) -> String {
-        self.prefix.clone()
-    }
-
+    /// Returns the current `format`
     pub fn get_format(&self) -> OutputType {
         self.format.clone()
     }

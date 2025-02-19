@@ -74,6 +74,7 @@ impl Default for Template {
 }
 
 impl Config {
+    /// Gets the config from the default file location
     pub fn get_config() -> Result<Self, String> {
         let path = ProjectDirs::from("", "", "QuickMD")
             .ok_or("Could not resolve project directory")?
@@ -82,6 +83,8 @@ impl Config {
 
         Config::get_config_from_path(path)
     }
+
+    /// Gets the config from a given path
     pub fn get_config_from_path(path: PathBuf) -> Result<Self, String> {
         let config_contents = std::fs::read_to_string(path.clone()).map_err(|e| {
             format!(
@@ -102,23 +105,60 @@ impl Config {
         Ok(config)
     }
 
+    // Gets the associated config for the `lang`
     pub fn get_lang_conf(&self, lang: &str) -> Option<&LanguageConfig> {
         self.langs.get(lang)
     }
 
+    // Gets the associated config for the `lang`
     pub fn get_mut_lang_conf(&mut self, lang: &str) -> Option<&mut LanguageConfig> {
         self.langs.get_mut(lang)
     }
 }
 
 impl LanguageConfig {
+    /// Gets the command name for the `LanguageConfig`
+    /// 
+    /// ## Example
+    /// ```toml
+    /// [langs.c]
+    /// command = ["gcc", "-o", "{{OUT}}", "{{IN}}"]
+    /// ```
+    /// ```
+    /// use quickermd::QuickerMD;
+    /// 
+    /// let config = QuickerMD::new().unwrap();
+    /// let c_config = config.get_config_for_lang("c").unwrap();
+    /// assert_eq!(c_config.get_command_name(), "gcc");
+    /// ```
     pub fn get_command_name(&self) -> String {
         self.compile_command[0].clone()
     }
+
+    /// Gets the command arguments for the `LanguageConfig`
+    /// 
+    /// ## Example
+    /// ```toml
+    /// [langs.c]
+    /// command = ["gcc", "{{IN}}", "-o", "{{OUT}}"]
+    /// ```
+    /// ```
+    /// use quickermd::QuickerMD;
+    /// 
+    /// let config = QuickerMD::new().unwrap();
+    /// let c_config = config.get_config_for_lang("c").unwrap();
+    /// assert_eq!(c_config.get_command_args(), vec![
+    ///     "{{IN}}".to_string(),
+    ///     "-o".to_string(),
+    ///     "{{OUT}}".to_string(),
+    /// ]);
+    /// ```
     pub fn get_command_args(&self) -> Vec<String> {
         self.compile_command.iter().skip(1).cloned().collect()
     }
 
+    /// Returns the command for running the template, or `None`
+    /// if the user explicitly set no run command
     pub fn get_run_command(&self, file: String) -> Option<(String, Vec<String>)> {
         if let Some(command_type) = self.run_command.clone() {
             return match command_type {
@@ -144,10 +184,12 @@ impl LanguageConfig {
         self.comment.clone()
     }
 
+    /// Sets the comment string for the `LanguageConfig`
     pub fn set_raw_comment_string(&mut self, comment: String) {
         self.comment = Some(comment);
     }
 
+    /// Gets the comment string for the `LanguageConfig`
     pub fn get_comment_string(&self) -> Option<String> {
         if let Some(comment) = self.comment.clone() {
             if !comment.contains("%s") {
@@ -163,6 +205,7 @@ impl LanguageConfig {
         None
     }
 
+    /// Resolves the comment string from an input
     pub fn resolve_comment_string(&self, with: &str) -> Option<String> {
         if let Some(comment_string) = self.comment.clone() {
             return Some(comment_string.replace("%s", with));
